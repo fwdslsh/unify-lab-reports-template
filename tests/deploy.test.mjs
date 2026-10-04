@@ -16,6 +16,7 @@ function fixture() {
   git('init', '-q', '-b', 'main');
   git('config', 'user.name', 'Deployment test');
   git('config', 'user.email', 'test@example.invalid');
+  writeFileSync(join(repo, 'config.json'), '{}');
   const fake = join(root, 'bun');
   writeFileSync(fake, `#!/usr/bin/env bash
 set -eu
@@ -51,7 +52,7 @@ test('new revisions publish atomically, unchanged revisions do not rebuild, and 
     const second = f.commit('second site');
     assert.equal(f.run().status, 0);
     assert.equal(f.publicFile(), 'second site');
-    assert.equal(readlinkSync(join(f.env.PUBLISH_DIR, 'current')), '_releases/' + second);
+    assert.ok(readlinkSync(join(f.env.PUBLISH_DIR, 'current')).startsWith('_releases/' + second + '-'));
     f.git('revert', '--no-edit', 'HEAD');
     assert.equal(f.run().status, 0);
     assert.equal(f.publicFile(), 'first site');
@@ -89,13 +90,14 @@ test('missing required output cannot replace a working site', () => {
   } finally { f.close(); }
 });
 
-test('environment-only changes publish atomically and failed configuration builds retain the current site', () => {
+test('one config file changes publication; unrelated environment does not', () => {
   const f = fixture();
   try {
     const revision = f.commit('same source');
     assert.equal(f.run().status, 0);
     const original = readlinkSync(join(f.env.PUBLISH_DIR, 'current'));
-    f.env.SITE_BRAND = 'Alternate lab';
+    f.env.CONFIG_FILE = join(f.root, 'config.json');
+    writeFileSync(f.env.CONFIG_FILE, '{"site":{"brand":"Alternate lab"}}');
     assert.equal(f.run().status, 0);
     const configured = readlinkSync(join(f.env.PUBLISH_DIR, 'current'));
     assert.notEqual(configured, original);
@@ -105,7 +107,7 @@ test('environment-only changes publish atomically and failed configuration build
     f.env.UNRELATED_SECRET = 'not-an-input';
     assert.equal(f.run().stdout, '');
     writeFileSync(f.env.BUN, '#!/bin/sh\nexit 1\n', { mode: 0o755 });
-    f.env.SITE_BRAND = 'Broken configuration';
+    writeFileSync(f.env.CONFIG_FILE, '{"site":{"brand":"Another lab"}}');
     assert.notEqual(f.run().status, 0);
     assert.equal(readlinkSync(join(f.env.PUBLISH_DIR, 'current')), configured);
     assert.equal(f.publicFile(), 'same source');

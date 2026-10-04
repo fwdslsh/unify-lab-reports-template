@@ -13,11 +13,11 @@
       <div class="site-brand">
         <include src="/_generated/brand.html"></include>
       </div>
-      <include src="/includes/base/nav.html"></include>
+      <include src="/includes/nav.html"></include>
     </header>
     <main id="main"><slot></slot></main>
     <footer class="site-footer">
-      <slot name="footer"><include src="/includes/base/footer.html"></include></slot>
+      <slot name="footer"><include src="/includes/footer.html"></include></slot>
     </footer>
     <script type="module">
       const section = location.pathname.startsWith('/articles/') ? 'articles'

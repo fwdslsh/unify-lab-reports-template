@@ -28,8 +28,9 @@ test('real npm payload excludes private state and builds with only shipped files
     }
     const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author));
     const names = packed.files.map(file => file.path);
-    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'lab.json', 'site.config.json', 'DEPLOY.md', 'LICENSE', 'NOTICE.md', 'LICENSES/CC-BY-4.0.txt', 'scripts/gen.mjs', 'scripts/probes/linux.sh']) expect(names).toContain(required);
+    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
+    expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);
     const extracted = join(temp, 'extracted');
     mkdirSync(extracted);
@@ -42,7 +43,11 @@ test('real npm payload excludes private state and builds with only shipped files
     expect(home).toContain('Not assessed');
     expect(home).not.toContain('No issues in checked signals');
     expect(home).not.toContain('<input');
-    run('bun', ['run', 'build'], project, { SITE_BRAND: 'Fresh lab', SITE_HOME_LABEL: 'Fresh dashboard' });
+    const configPath = join(project, 'config.json');
+    const config = JSON.parse(readFileSync(configPath, 'utf8'));
+    config.site.brand = 'Fresh lab';
+    writeFileSync(configPath, JSON.stringify(config));
+    run('bun', ['run', 'build'], project);
     expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Fresh lab');
     function files(path) { return readdirSync(path, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? files(join(path, entry.name)) : [join(path, entry.name)]); }
     for (const file of files(project).filter(path => !path.includes('/node_modules/'))) expect(readFileSync(file, 'utf8')).not.toContain(secret);
@@ -56,7 +61,7 @@ test('explicit collection probes local HTTP but never stores response bodies', a
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
     const port = server.address().port;
-    const config = join(temp, 'lab.json');
+    const config = join(temp, 'config.json');
     const snapshot = join(temp, 'observed.json');
     writeFileSync(config, JSON.stringify({ hosts: [], endpoints: [
       { id: 'up', label: 'Up', url: `http://127.0.0.1:${port}/health` },
@@ -72,7 +77,7 @@ test('explicit collection probes local HTTP but never stores response bodies', a
     const observed = JSON.parse(data);
     observed.hosts['not-configured'] = { collected: true, facts: { host: ['outside-inventory-scope'] } };
     writeFileSync(snapshot, JSON.stringify(observed));
-    run('bun', ['run', 'build', '--', '-o', join(temp, 'dist')], root, { LAB_CONFIG: config, LAB_SNAPSHOT: snapshot });
+    run('bun', ['run', 'build', '--', '-o', join(temp, 'dist')], root, { CONFIG_FILE: config, SNAPSHOT_FILE: snapshot });
     const html = readFileSync(join(temp, 'dist/index.html'), 'utf8');
     expect(html).toContain('Down · unreachable');
     expect(html).toContain('HTTP reachability only');

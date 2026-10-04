@@ -1,43 +1,45 @@
 ---
 title: Backup scope and recovery
-description: Configure expected backup coverage and assess available evidence.
+description: Monitor existing backup evidence and explicitly declare expected coverage.
 ---
-# Backup scope and recovery
 
-Backups are observed, not created by this template. Configure your existing
-backup jobs in `lab.json`:
+# Backup scope
+
+Configure backups in the same config.json. The template does not create backup
+jobs, grant permissions or install host services.
 
 ```json
 {
-  "id": "server-local",
-  "host": "server",
-  "unit": "backup-local",
-  "label": "Server · local",
-  "max_age_hours": 36,
-  "scope": "Selected application data",
-  "receipt_path": "/var/lib/backups/last-success",
-  "completion_marker": "/var/lib/backups/SNAPSHOT_COMPLETE",
-  "offsite": false
+  "backups": {
+    "jobs": [
+      { "id": "server-copy", "host": "server", "unit": "backup-data",
+        "label": "Server data", "maxAgeHours": 36, "scope": "Application data",
+        "receiptPath": "/var/lib/backup/last-success",
+        "completionMarker": "/var/lib/backup/completed", "offsite": true }
+    ],
+    "expectations": [
+      { "target": "server", "jobs": ["server-copy"],
+        "note": "Application data", "needsOffsite": true },
+      { "target": "server/database-*", "jobs": ["server-copy"], "note": "Database state" }
+    ]
+  },
+  "exclusions": { "backups": { "server/cache-*": "Reproducible cache" } }
 }
 ```
 
-`unit` names an existing Linux systemd backup service without `.service`.
-`receipt_path` and `completion_marker` are optional absolute paths on that host.
-A receipt contains a timezone-qualified ISO timestamp. The marker confirms that
-the snapshot completed. Explicit receipt/marker failures never fall back to a
-passing systemd timestamp. Without explicit files, a successful completed
-systemd run supplies weaker evidence, which the dashboard labels accordingly.
+Each job references a configured host and an existing Linux systemd unit
+(without .service). A receipt contains one real ISO success timestamp with a
+timezone. If supplied, a missing receipt or completion marker cannot fall back
+to an unrelated successful unit run. Without explicit receipt/marker paths,
+the observer uses the unit's last completed successful run; it may be unknown
+after reboot.
 
-`backup_expectations` describe hosts and stateful containers that should be
-protected. Each contains `target`, `jobs` (job IDs), and `note`. Targets can use
-globs. An empty job list produces a coverage gap. Overlapping expectations are
-rejected rather than double-counted. Set `needs_offsite: true` where local-only
-protection is insufficient. Exclude intentionally unmanaged targets with a
-reason in `backup_exclusions`.
+Set offsite only for an established off-host copy. Expectations name stateful
+hosts/containers, monitored job IDs and a scope note. Empty jobs creates a
+coverage gap; overlapping patterns are rejected. Add/remove expectations or
+record an exclusion to adjust scope. Unconfigured resources are not silently
+declared backed up.
 
-No configured expectations means **not assessed**, not protected.
-A successful backup is not a verified restore. Record restore drills in a report.
-
-Site recovery: preserve Git source, private `.env`, SSH keys, and collector state.
-Rebuild static output from source. A normal Git revert rolls back content; a
-failed build leaves the previous published release served.
+No targets means “Not assessed.” Missing/stale/failed evidence needs review.
+A successful job or configured scope is never proof of a working restore.
+Keep credentials and private backup artifacts outside the site.

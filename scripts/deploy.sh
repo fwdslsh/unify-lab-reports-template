@@ -6,6 +6,10 @@ set -euo pipefail
 : "${PUBLISH_DIR:?Set PUBLISH_DIR to the Caddy-mounted output directory}"
 BRANCH=${BRANCH:-main}
 BUN=${BUN:-bun}
+COLLECT=${COLLECT:-false}
+COLLECT_SECONDS=${COLLECT_SECONDS:-1800}
+[[ "$COLLECT" = true || "$COLLECT" = false ]] || { echo 'COLLECT must be true or false' >&2; exit 2; }
+[[ "$COLLECT_SECONDS" =~ ^[0-9]+$ ]] && (( COLLECT_SECONDS >= 60 && COLLECT_SECONDS <= 86400 )) || { echo 'COLLECT_SECONDS must be 60–86400' >&2; exit 2; }
 git check-ref-format "refs/heads/$BRANCH"
 mkdir -p "$STATE_DIR" "$PUBLISH_DIR/_releases"
 STATE_DIR=$(realpath "$STATE_DIR")
@@ -20,7 +24,26 @@ fi
 git --git-dir="$CACHE" fetch --quiet --no-tags "$REPO_URL" "+refs/heads/$BRANCH:refs/heads/publish"
 REVISION=$(git --git-dir="$CACHE" rev-parse refs/heads/publish)
 [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]] || { echo 'Unsupported Git revision' >&2; exit 1; }
-CONFIG_HASH=$(python3 "$(dirname "${BASH_SOURCE[0]}")/settings.py" --env-hash)
+# Configuration belongs to the fetched source revision, not the image or host clone.
+if [ -z "${CONFIG_FILE:-}" ]; then
+  git --git-dir="$CACHE" show "$REVISION:config.json" > "$STATE_DIR/.config-next"
+  mv -f "$STATE_DIR/.config-next" "$STATE_DIR/config.json"
+  export CONFIG_FILE="$STATE_DIR/config.json"
+fi
+export SNAPSHOT_FILE=${SNAPSHOT_FILE:-$STATE_DIR/observed.json}
+export PREVIOUS_FILE=${PREVIOUS_FILE:-$STATE_DIR/previous.json}
+if [ "${COLLECT:-false}" = true ]; then
+  last=0
+  if [ -r "$STATE_DIR/last-collection-ok" ]; then read -r last < "$STATE_DIR/last-collection-ok"; fi
+  [[ "$last" =~ ^[0-9]+$ ]] || last=0
+  if (( $(date +%s) - last >= COLLECT_SECONDS )); then
+    if timeout 300 bun "$(dirname "${BASH_SOURCE[0]}")/collect.mjs"; then
+      date +%s > "$STATE_DIR/.collection-next"
+      mv -f "$STATE_DIR/.collection-next" "$STATE_DIR/last-collection-ok"
+    else echo 'reports-site: collection failed; retaining the previous snapshot' >&2; fi
+  fi
+fi
+CONFIG_HASH=$(bun "$(dirname "${BASH_SOURCE[0]}")/config.mjs" --hash)
 TARGET="_releases/$REVISION${CONFIG_HASH:+-$CONFIG_HASH}"
 PREVIOUS=$(readlink "$PUBLISH_DIR/current" || true)
 if [ "$PREVIOUS" = "$TARGET" ] && [ -f "$PUBLISH_DIR/current/index.html" ]; then

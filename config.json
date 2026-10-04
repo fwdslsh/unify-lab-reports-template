@@ -1,0 +1,20 @@
+{
+  "site": {
+    "brand": "My lab",
+    "title": "Lab reports",
+    "description": "Lab reports and dashboard",
+    "footer": "Private lab reports"
+  },
+  "reports": { "prefix": "lab", "timezone": "UTC", "weeklyKeep": 2 },
+  "hosts": [],
+  "endpoints": [],
+  "thresholds": {
+    "memoryWarningPercent": 90,
+    "diskWarningPercent": 85,
+    "criticalPercent": 95,
+    "loadPerCore": 1.5,
+    "staleAfterMinutes": 90
+  },
+  "backups": { "jobs": [], "expectations": [] },
+  "exclusions": { "containers": {}, "endpoints": {}, "backups": {} }
+}

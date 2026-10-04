@@ -1,101 +1,101 @@
 # Unify lab reports template
 
-A configurable Unify site with a compact dashboard, Markdown/HTML reports,
-guides, articles, searchable page directory, and thumb-friendly mobile navigation.
-No database, hosted control plane, or required monitoring service.
+A static dashboard, reports, guides and articles. One runtime, one site config,
+no database, and no monitoring service required.
 
 ## Start
 
-Requirements: Bun 1.4+, Python 3.10+, and Git. Docker is optional. Windows users
-can run the publishing container or use WSL2; remote Windows observation uses
-native OpenSSH and PowerShell.
-
-Copy `.env.example` to ignored `.env`, set your branding, then:
+Install Bun 1.4+, then:
 
 ```sh
 bun install --frozen-lockfile --ignore-scripts
 bun run dev
 ```
 
-The default lab lists are empty. The dashboard shows **not collected**, not
-fictional healthy hosts. All site builds are offline: building never probes a
-host, invokes collection, installs a service or modifies report sources.
+Edit **config.json**. It contains branding, report retention, hosts, endpoints,
+thresholds, backup jobs and exclusions. No .env file is needed to build or
+preview the site. Unify's own build options remain in unify.yaml.
 
-## Configure your lab
+The starter has no hosts or fake telemetry. The dashboard honestly shows
+“Not collected” until you configure and run collection.
 
-- `.env`: branding, public footer links, timezone, retention and optional
-  collection/publishing settings. Inherited environment wins over `.env`,
-  which wins over `site.config.json` defaults.
-- `lab.json`: host definitions, endpoint URLs, thresholds, backup jobs,
-  expected coverage and exclusions. Configure these lists rather than editing code.
-- `state/`: ignored collector snapshots and restart baselines. Private runtime
-  state is not packaged or served.
+## Source layout
 
-The starter [collection guide](site/docs/runbooks/collection.md) and
-[backup guide](site/docs/services/backups.md) show complete examples and explain
-what each signal proves. Use `LAB_CONFIG` for another configuration file and
-`LAB_SNAPSHOT` for an existing compatible snapshot. Paths are relative to the
-project root unless absolute. Do not put credentials in public settings or URLs.
+- site/index.html: the homepage, including the generated dashboard fragment.
+- site/articles/, site/incidents/, site/health/, site/docs/: authored content.
+- includes/: shared navigation and footer.
+- scripts/: JavaScript generator, collector, retention and publishing tools.
+- config.json: the single source of site and lab settings.
+- state/: ignored observation snapshots and publisher cache, not source.
 
-```sh
-bun run collect                       # explicit read-only collection
-bun run build                         # strict audited static build
-bun run test                          # fixture-based regressions
-bun run retain:health                 # retention preview, no deletion
-```
+Unify discovers source pages and metadata, composes HTML/Markdown, rewrites
+URLs and builds search content. The generator uses that inventory; it does not
+crawl another content source or replace authored files. The homepage has no
+search; All pages provides the searchable directory.
 
-Collection uses configured native SSH accounts with strict host-key checking.
-It supports Linux, macOS and Windows basic host facts. Linux also supplies
-Docker health/restarts, bounded system-log error counts and existing backup-job
-evidence. It installs nothing on hosts and never copies raw logs or environment.
-Unsupported or inaccessible signals remain unknown. Optional hosts/endpoints
-and observation windows prevent intentional downtime from looking like failure.
-
-## Write reports
-
-Write ordinary Markdown or HTML in `site/articles/`, `site/incidents/`,
-`site/health/`, and `site/docs/`. Give each page a title and description; incidents
-and weekly reviews also require a real ISO observation date. Optional `tags`,
-`series`, and `part` drive navigation through Unify's source inventory.
-Generated collections and the dashboard never write back to these files.
-An authored `site/index.html` or inventory page can replace its generated view.
-
-Weekly retention uses `REPORTS_HEALTH_PREFIX` (default `lab`) and
-`REPORTS_WEEKLY_KEEP` (default two). Only matching timestamped review/spot files
-qualify. Spots are not published. `--apply --commit` is explicit and requires
-Git recovery; modified reports, invalid dates, symlinks and collisions stop or
-skip cleanup. Publisher builds do not delete or automatically commit source.
-
-## Docker publication
-
-See [DEPLOY.md](DEPLOY.md). The optional non-root builder checks YOUR site repo,
-builds changed source or observation/configuration input, and atomically updates
-static output. A failed build retains the previous release. Use an existing
-Caddy/nginx/static host to serve it; the builder opens no ports. Collection is
-default-off and uses the same container's existing loop when enabled. No Docker
-socket, privileged mode or native host cron/systemd service is required.
-
-## Template distribution
-
-Planned npm package: `@fwdslsh/unify-lab-reports-template`. `npm pack` produces the same
-flat project files used by directory and Git sources, with an explicit allowlist
-and no install hooks. Source content is anonymous examples, not a sanitized copy
-of private lab history. Development tests and the lockfile are included so the
-scaffold remains independently verifiable.
-
-Unify's custom `init` support for directories, Git and npm is in development.
-The currently pinned 0.10.1 does not yet accept this package as an init source.
-No speculative manifest, installer wrapper or command syntax is supplied.
-Release acceptance must run the packed artifact through the real custom-init
-contract once its implementation is available, then update the tested Unify pin.
-
-To inspect the npm artifact now:
+## Observe your lab
 
 ```sh
-npm pack --ignore-scripts
-tar -tzf fwdslsh-unify-lab-reports-template-0.1.0-alpha.1.tgz
+bun run collect
+bun run build
+bun run test
 ```
 
-No npm release or public repository publication is automatic. See
-[NOTICE.md](NOTICE.md) for attribution. Template code is MIT licensed; the reused
-website visual theme retains its CC-BY-4.0 license.
+Collection is explicit and read-only. Building is offline and never contacts
+hosts or runs collection. SSH uses native accounts and strict host-key checking.
+Linux checks use Bash and existing native utilities, not Python, Node or jq on
+the observed host. macOS and Windows provide basic native host facts.
+
+Linux observations include resources, container health/restarts, system-log
+error counts and existing backup evidence. Raw logs, container environments and
+HTTP response bodies are never published. Missing evidence stays unknown.
+Optional hosts/endpoints and observation windows prevent intentional downtime
+from becoming false outages.
+
+See the [collection guide](site/docs/runbooks/collection.md) and
+[backup guide](site/docs/services/backups.md) for config.json examples.
+For a different config or snapshot, pass --config/--output to collect or use
+CONFIG_FILE/SNAPSHOT_FILE. These are file locations, not a second settings
+registry.
+
+## Write and retain reports
+
+Write ordinary Markdown or HTML. Every page needs title and description.
+Incidents and weekly reviews also need a real ISO observation date.
+Optional tags, series and part metadata drive navigation.
+
+The default policy keeps two weekly snapshots and no spot reports. Only
+timestamped files matching reports.prefix qualify. Unknown files, articles,
+incidents, symlinks, invalid/future dates and modified snapshots are preserved
+or stop cleanup. HTML/Markdown twins count as one snapshot.
+
+```sh
+bun run retain:health                  # preview only
+bun run retain:health -- --apply --commit
+```
+
+Deletion requires Git recovery. Publication never deletes or auto-commits
+authored reports.
+
+## Host and distribute
+
+See [DEPLOY.md](DEPLOY.md) for optional Docker publication. The builder fetches
+your Git repo and reads config.json from that revision, avoiding a stale
+image-baked or host-clone config. It publishes good builds atomically and retains
+the last good site on failure. Optional collection uses that same container;
+no host cron/systemd, extra server, privileged mode or Docker socket.
+
+.env.example contains only optional deployment settings. It is not required for
+local use and does not duplicate branding, inventory or policy.
+
+Package: **@fwdslsh/unify-lab-reports-template**. npm pack creates an allowlisted
+flat project payload with tests and lockfile, but no private environment, state
+or installation hooks. Nothing is automatically published.
+
+Unify's custom init support for directory/Git/npm sources is still in development.
+The tested 0.10.1 cannot initialize this package directly yet. Before releasing,
+verify all three sources using the real supported init contract; no custom
+installer or speculative template manifest is supplied.
+
+MIT licensed, including the theme, under the project owner's authorization.
+External dependencies retain their own licenses.

@@ -1,12 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- MIT-only template, including the theme, authorized by the project owner.
+- One config.json for site identity and lab/report policy; optional deployment-only .env.
+- Explicit site/index.html and flat includes/.
+- Bun/JavaScript tools and tests; native remote probes need no Python, Node or jq.
+- Publisher reads configuration from the fetched Git revision for collection and builds.
+
 ## 0.1.0-alpha.1
 
-- Initial clean-history lab reports template and npm artifact preparation.
-- Configurable identity, report policy and generic lab inventory.
-- Optional Linux/macOS/Windows observations; Linux container/log/backup evidence.
-- Offline builds, searchable page directory and persistent mobile navigation.
-- Non-root container publishing with atomic rollback and default-off collection.
-- Unify 0.10.1 with a reproducible lockfile; no custom-init compatibility shim.
-
-npm publication awaits supported custom Unify init validation.
+- Initial configurable lab reports template and allowlisted npm preparation.
+- Dashboard, reports, guides, search, mobile navigation, observations and backups.
+- Non-root atomic container publishing with rollback and default-off collection.
+- Tested Unify 0.10.1. npm publication awaits native custom-init verification.

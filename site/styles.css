@@ -1,5 +1,5 @@
 /* Lab reports — single shared stylesheet.
-   Adapted fwdslsh visual theme; attribution and license in NOTICE.md.
+   MIT licensed fwdslsh visual theme.
    No JavaScript; light/dark via prefers-color-scheme. */
 
 :root {

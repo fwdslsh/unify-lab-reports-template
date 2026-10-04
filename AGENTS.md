@@ -1,21 +1,21 @@
 # Lab reports template
 
-Keep this a normal Unify project. `site/` is authored source; generators write
-only Unify's overlay. Do not add a template language, source crawler, database,
-background host service or custom init wrapper.
+Keep this a normal Unify project. site/ is authored source; generators write
+only Unify's overlay. site/index.html is explicit, includes/ is flat, and
+config.json is the only site/lab configuration file. Do not add a custom
+template language, source crawler, database, Python dependency, host background
+service, duplicate configuration registry or custom init wrapper.
 
-Use `.env`/`site.config.json` for scalar public settings and `lab.json` for host,
-endpoint and backup lists/policy. Collection is explicit, bounded and default-off.
-Native SSH trust/permissions are operator-owned. Builds never run collection.
-Never publish secrets, raw journal messages, container environment or unrelated
-private files. No Docker socket, root container or automatic host trust changes.
+Bun runs the JavaScript tools and tests. Collection is explicit, bounded,
+read-only and default-off. Native SSH trust/permissions are operator-owned.
+Builds never collect. Never publish credentials, HTTP bodies, raw journal text,
+container environments or unrelated files. No Docker socket/root container.
 
-Preserve the dashboard's alerts, host metrics, container health, backup evidence,
-search and thumb-friendly mobile navigation. Missing evidence stays unknown;
-running is not healthy, HTTP success is not authenticated readiness, and backup
-success is not a restore test.
+Keep dashboard alerts, visible host metrics, container health, backup evidence,
+search and mobile bottom navigation. Missing evidence stays unknown. Running
+is not healthy, HTTP success is not authenticated readiness, and backup success
+is not a restore test.
 
-Verify `bun run test`, `bun run check`, `bun run build`, changed shell syntax,
-Compose configuration and the npm payload. New distributions need a clean-history
-privacy review. Never modify an existing lab's production content to update this
+Verify bun run test, bun run check, bun run build, shell syntax, Compose and
+the npm payload. Do not change an existing lab's production site through this
 template. No npm publication without explicit authorization and release gates.

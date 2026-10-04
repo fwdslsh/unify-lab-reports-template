@@ -1,7 +1,5 @@
 node_modules/
 dist/
-__pycache__/
-*.pyc
 .env
 .env.*
 !.env.example
@@ -9,5 +7,4 @@ __pycache__/
 state/
 published/
 ssh/
-lab.local.json
 *.tgz
