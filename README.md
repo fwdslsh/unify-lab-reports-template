@@ -84,7 +84,7 @@ of private lab history. Development tests and the lockfile are included so the
 scaffold remains independently verifiable.
 
 Unify's custom `init` support for directories, Git and npm is in development.
-The currently pinned 0.10.0 does not yet accept this package as an init source.
+The currently pinned 0.10.1 does not yet accept this package as an init source.
 No speculative manifest, installer wrapper or command syntax is supplied.
 Release acceptance must run the packed artifact through the real custom-init
 contract once its implementation is available, then update the tested Unify pin.

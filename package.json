@@ -4,12 +4,33 @@
   "description": "A configurable Unify lab reports site with a static health dashboard and optional bounded collection.",
   "type": "module",
   "license": "MIT AND CC-BY-4.0",
-  "engines": { "bun": ">=1.4.0", "node": ">=24" },
+  "engines": {
+    "bun": ">=1.4.0",
+    "node": ">=24"
+  },
   "files": [
-    "site/", "includes/", "scripts/*.mjs", "scripts/*.py", "scripts/probes/",
-    "deploy/", "tests/*.mjs", "tests/*.py", "unify.yaml", "site.config.json",
-    "lab.json", ".env.example", ".gitignore", ".dockerignore", "bun.lock",
-    "README.md", "DEPLOY.md", "AGENTS.md", "NOTICE.md", "LICENSE", "LICENSES/", "CHANGELOG.md"
+    "site/",
+    "includes/",
+    "scripts/*.mjs",
+    "scripts/*.py",
+    "scripts/probes/",
+    "deploy/",
+    "tests/*.mjs",
+    "tests/*.py",
+    "unify.yaml",
+    "site.config.json",
+    "lab.json",
+    ".env.example",
+    ".gitignore",
+    ".dockerignore",
+    "bun.lock",
+    "README.md",
+    "DEPLOY.md",
+    "AGENTS.md",
+    "NOTICE.md",
+    "LICENSE",
+    "LICENSES/",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "dev": "unify dev",
@@ -20,6 +41,10 @@
     "collect": "bun scripts/collect.mjs",
     "retain:health": "python3 scripts/retain-health.py"
   },
-  "devDependencies": { "@fwdslsh/unify": "^0.10.0" },
-  "publishConfig": { "access": "public" }
+  "devDependencies": {
+    "@fwdslsh/unify": "^0.10.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

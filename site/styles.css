@@ -1,5 +1,5 @@
-/* fwdslsh lab reports — single shared stylesheet.
-   Palette consolidated from the original lab-landing/index.html "terminal green" look.
+/* Lab reports — single shared stylesheet.
+   Adapted fwdslsh visual theme; attribution and license in NOTICE.md.
    No JavaScript; light/dark via prefers-color-scheme. */
 
 :root {
