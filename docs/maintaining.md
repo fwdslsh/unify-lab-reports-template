@@ -27,3 +27,48 @@ authorization; there is no forge-to-forge publishing integration.
 The package name is @fwdslsh/unify-lab-reports-template. Its own files/theme are
 MIT; dependencies retain their own licenses. See template-updates.md for site
 ownership and the upstream update feature still required.
+
+## GitHub mirror and npm release
+
+Gitea remains the development remote. Push reviewed main updates to the GitHub
+remote explicitly; no automatic cross-forge service or Gitea token in GitHub is
+needed. The public mirror is fwdslsh/unify-lab-reports-template.
+
+The GitHub release.yml workflow verifies main, pull requests and manual runs
+without publishing. It tests native directory/Git/npm installation, audits the
+build, validates shell/Compose and uploads the actual npm tarball. A pushed v*
+tag additionally publishes that exact tested tarball; it must match package.json.
+Prereleases use npm's next dist-tag; stable versions use latest. Manual runs only
+verify, so testing the workflow does not release a package.
+
+Configure npm trusted publishing for @fwdslsh/unify-lab-reports-template:
+
+- GitHub organization: fwdslsh
+- Repository: unify-lab-reports-template
+- Workflow filename: release.yml (not the full path)
+- Environment: leave blank; allow direct npm publish
+
+See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
+The workflow uses GitHub-hosted runners, npm 12.2.0, job-scoped id-token: write
+and provenance. It does not require NPM_TOKEN or any Gitea credential. Configure
+the trusted publisher before expecting a tag run to publish successfully. If npm
+requires an initial package publication before its settings are available, an
+authorized maintainer must bootstrap it once with native npm authentication;
+do not add a permanent token fallback or claim OIDC setup has been completed.
+
+For a release, update package.json's version and CHANGELOG.md, run checks, commit
+and push main to both remotes. Then tag that reviewed commit and push the tag to
+GitHub (and Gitea for history):
+
+```sh
+git remote add github https://github.com/fwdslsh/unify-lab-reports-template.git
+git push github HEAD:main
+git tag v0.1.0-alpha.1
+git push github v0.1.0-alpha.1
+git push origin v0.1.0-alpha.1
+```
+
+Use the actual version and skip remote creation if already configured. Watch
+GitHub Actions; a successful verification is not proof of registry publication.
+Check npm's version/dist-tag and exercise native init from the published package
+after release. Never republish an immutable version or silently overwrite a tag.

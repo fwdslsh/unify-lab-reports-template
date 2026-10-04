@@ -12,13 +12,13 @@ Install Bun 1.4+ and Unify 0.11+, then initialize an empty project:
 bun add --global @fwdslsh/unify@^0.11.0
 mkdir my-lab-reports
 cd my-lab-reports
-unify init https://code.lab.fwdslsh.dev/fwdslsh/unify-lab-reports-template.git
+unify init https://github.com/fwdslsh/unify-lab-reports-template.git
 unify dev
 ```
 
-The URL identifies the template source, not a repository you must create or
-keep connected. Access to that template repository is needed for this example;
-you can instead use `unify init /path/to/clean/template` with downloaded files.
+The URL identifies the public template source, not a repository you must create
+or keep connected. You can instead use `unify init /path/to/clean/template`
+with downloaded files.
 Directory sources must be clean: Unify copies regular files, including ignored
 runtime data if present. The npm package will provide another source once
 published; it is not published yet.

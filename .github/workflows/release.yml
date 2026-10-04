@@ -1,0 +1,97 @@
+name: Verify and publish
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.repository == 'fwdslsh/unify-lab-reports-template'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      npm_tag: ${{ steps.version.outputs.npm_tag }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1.4.1'
+      - name: Check package identity and release tag
+        id: version
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+          if (pkg.name !== '@fwdslsh/unify-lab-reports-template' || pkg.private) {
+            throw new Error('Unexpected package identity or private package');
+          }
+          if (process.env.GITHUB_REF_TYPE === 'tag' && process.env.GITHUB_REF_NAME !== `v${pkg.version}`) {
+            throw new Error('Release tag must match package.json version');
+          }
+          appendFileSync(process.env.GITHUB_OUTPUT, `npm_tag=${pkg.version.includes('-') ? 'next' : 'latest'}\n`);
+          JS
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun run test
+      - run: bun run check
+      - run: bun run build
+      - run: bun run audit
+      - name: Check shell and Compose
+        env:
+          REPO_URL: https://github.com/example/my-lab-reports.git
+        run: |
+          bash -n scripts/deploy.sh deploy/poll.sh scripts/probes/*.sh
+          docker compose config --quiet
+      - name: Pack verified template
+        run: |
+          mkdir -p "$RUNNER_TEMP/template-package"
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/template-package"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-package
+          path: ${{ runner.temp }}/template-package/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'fwdslsh/unify-lab-reports-template'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global npm@12.2.0 --ignore-scripts
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: npm-package
+          path: package-artifact
+      - name: Publish tested tarball with trusted publishing
+        env:
+          NPM_TAG: ${{ needs.verify.outputs.npm_tag }}
+        run: |
+          shopt -s nullglob
+          archives=(package-artifact/*.tgz)
+          [ "${#archives[@]}" -eq 1 ] || { echo 'Expected one tested package tarball' >&2; exit 1; }
+          npm publish "${archives[0]}" --access public --tag "$NPM_TAG" --provenance --ignore-scripts
