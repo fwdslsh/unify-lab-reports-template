@@ -28,7 +28,7 @@ test('real npm payload excludes private state and builds with only shipped files
     }
     const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author));
     const names = packed.files.map(file => file.path);
-    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
+    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
     expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);

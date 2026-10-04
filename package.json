@@ -12,6 +12,7 @@
     "site/",
     "includes/",
     "scripts/*.mjs",
+    "scripts/deploy.sh",
     "scripts/probes/",
     "deploy/",
     "tests/*.mjs",
