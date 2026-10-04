@@ -1,0 +1,25 @@
+{
+  "name": "@fwdslsh/unify-lab-reports-template",
+  "version": "0.1.0-alpha.1",
+  "description": "A configurable Unify lab reports site with a static health dashboard and optional bounded collection.",
+  "type": "module",
+  "license": "MIT AND CC-BY-4.0",
+  "engines": { "bun": ">=1.4.0", "node": ">=24" },
+  "files": [
+    "site/", "includes/", "scripts/*.mjs", "scripts/*.py", "scripts/probes/",
+    "deploy/", "tests/*.mjs", "tests/*.py", "unify.yaml", "site.config.json",
+    "lab.json", ".env.example", ".gitignore", ".dockerignore", "bun.lock",
+    "README.md", "DEPLOY.md", "AGENTS.md", "NOTICE.md", "LICENSE", "LICENSES/", "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "unify dev",
+    "check": "unify build --dry-run --strict",
+    "build": "unify build --clean --audit --strict",
+    "audit": "unify audit --strict",
+    "test": "bun test tests/*.test.mjs && python3 -m unittest discover -s tests -p 'test_*.py'",
+    "collect": "bun scripts/collect.mjs",
+    "retain:health": "python3 scripts/retain-health.py"
+  },
+  "devDependencies": { "@fwdslsh/unify": "^0.10.0" },
+  "publishConfig": { "access": "public" }
+}

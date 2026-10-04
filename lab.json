@@ -1,0 +1,16 @@
+{
+  "hosts": [],
+  "endpoints": [],
+  "thresholds": {
+    "memory_warning_percent": 90,
+    "disk_warning_percent": 85,
+    "critical_percent": 95,
+    "load_per_core": 1.5,
+    "stale_after_minutes": 90
+  },
+  "container_exclusions": {},
+  "endpoint_exclusions": {},
+  "backup_jobs": [],
+  "backup_expectations": [],
+  "backup_exclusions": {}
+}

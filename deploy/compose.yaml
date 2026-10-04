@@ -1,0 +1,39 @@
+name: reports-site
+services:
+  builder:
+    image: reports-site-builder:1
+    build:
+      context: ${BUILD_CONTEXT:-..}
+      dockerfile: deploy/Dockerfile
+      args:
+        PUBLISH_UID: ${PUBLISH_UID:-1000}
+        PUBLISH_GID: ${PUBLISH_GID:-1000}
+    user: "${PUBLISH_UID:-1000}:${PUBLISH_GID:-1000}"
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    env_file:
+      - path: ${SITE_ENV_FILE:-../.env}
+        required: false
+    environment:
+      REPO_URL: ${REPO_URL:?Set YOUR site Git URL}
+      BRANCH: ${BRANCH:-main}
+      GIT_SSH_COMMAND: ssh -i /run/ssh/git_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/run/ssh/known_hosts -o BatchMode=yes -o ConnectTimeout=10
+      LAB_CONFIG: /run/lab/lab.json
+      LAB_SNAPSHOT: /state/observed.json
+      LAB_PREVIOUS: /state/previous.json
+    volumes:
+      - ${STATE_PATH:?Set the dedicated builder state path}:/state
+      - ${PUBLISH_PATH:?Set the Caddy-mounted output path}:/publish
+      - ${SSH_PATH:-../ssh}:/run/ssh:ro
+      - ${LAB_CONFIG_PATH:-../lab.json}:/run/lab/lab.json:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: "2"}

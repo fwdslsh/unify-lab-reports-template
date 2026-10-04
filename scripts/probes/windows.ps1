@@ -1,0 +1,17 @@
+$ProgressPreference = 'SilentlyContinue'
+$os = Get-CimInstance Win32_OperatingSystem
+$cs = Get-CimInstance Win32_ComputerSystem
+$cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
+$disk = Get-Volume -DriveLetter C
+"host=$env:COMPUTERNAME"
+"os=$($os.Caption)"
+"kernel=build $($os.BuildNumber)"
+"cpu=$($cpu.Name.Trim())"
+"cores=$($cs.NumberOfLogicalProcessors)"
+"memtot=$([int]($os.TotalVisibleMemorySize / 1024))"
+"memused=$([int](($os.TotalVisibleMemorySize - (Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory).AvailableKBytes) / 1024))"
+"uptime=$((Get-Date) - $os.LastBootUpTime)"
+"load=cpu $([int]$cpu.LoadPercentage)%"
+"rootuse=$([int](100*(1-$disk.SizeRemaining/$disk.Size)))%"
+"rootsize=$([int]($disk.Size/1GB))G"
+"containers=none (Windows)"

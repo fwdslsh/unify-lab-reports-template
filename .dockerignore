@@ -1,0 +1,13 @@
+.git
+node_modules
+dist
+.env
+.env.*
+__pycache__
+**/__pycache__
+*.log
+state
+published
+ssh
+lab.local.json
+*.tgz
