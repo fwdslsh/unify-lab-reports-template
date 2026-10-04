@@ -31,6 +31,7 @@ test('container has no host control access and only dedicated writable mounts', 
   expect(compose).toContain('${STATE_PATH:-./state}:/state');
   expect(compose).toContain('${PUBLISH_PATH:-./published}:/publish');
   expect(image).toContain('bun add --exact --ignore-scripts @fwdslsh/unify@0.11.0');
+  expect(image).toContain('chmod -R a+rX /app/scripts /app/poll.sh');
 });
 test('invalid poll intervals are rejected', () => {
   for (const interval of ['0', '9', '121', 'not-a-number']) {

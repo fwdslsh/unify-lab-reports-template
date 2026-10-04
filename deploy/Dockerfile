@@ -11,6 +11,7 @@ WORKDIR /app
 RUN bun add --exact --ignore-scripts @fwdslsh/unify@0.11.0
 COPY scripts/ /app/scripts/
 COPY deploy/poll.sh /app/poll.sh
+RUN chmod -R a+rX /app/scripts /app/poll.sh
 USER ${PUBLISH_UID}:${PUBLISH_GID}
 ENV STATE_DIR=/state PUBLISH_DIR=/publish HOME=/state
 HEALTHCHECK --interval=60s --timeout=5s --start-period=300s CMD bash -c 'read -r checked < /state/last-check-ok && [[ "$checked" =~ ^[0-9]+$ ]] && (( $(date +%s) - checked < 240 ))'

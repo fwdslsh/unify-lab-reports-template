@@ -8,3 +8,5 @@ state/
 published/
 ssh/
 *.tgz
+# Leftover caches when upgrading a site from the former Python implementation.
+__pycache__/
