@@ -15,7 +15,7 @@ async function until(condition, milliseconds = 15000) {
   }
 }
 test('container has no host control access and only dedicated writable mounts', () => {
-  const compose = readFileSync(new URL('../deploy/compose.yaml', import.meta.url), 'utf8');
+  const compose = readFileSync(new URL('../compose.yaml', import.meta.url), 'utf8');
   const image = readFileSync(new URL('../deploy/Dockerfile', import.meta.url), 'utf8');
   for (const text of ['read_only: true', 'cap_drop: [ALL]', 'no-new-privileges:true', 'user:', 'init: true', '/run/ssh:ro']) expect(compose).toContain(text);
   for (const text of ['docker.sock', 'privileged:', 'ports:', '/home/', 'pid: host', 'network_mode: host']) expect(compose).not.toContain(text);
@@ -28,8 +28,9 @@ test('container has no host control access and only dedicated writable mounts', 
   expect(poll).not.toContain('systemctl');
   expect(image).not.toContain('python');
   expect(image).not.toContain('jq');
-  expect(compose).toContain('${STATE_PATH:-../state}:/state');
-  expect(compose).toContain('${PUBLISH_PATH:-../published}:/publish');
+  expect(compose).toContain('${STATE_PATH:-./state}:/state');
+  expect(compose).toContain('${PUBLISH_PATH:-./published}:/publish');
+  expect(image).toContain('bun add --exact --ignore-scripts @fwdslsh/unify@0.11.0');
 });
 test('invalid poll intervals are rejected', () => {
   for (const interval of ['0', '9', '121', 'not-a-number']) {

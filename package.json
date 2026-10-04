@@ -15,6 +15,8 @@
     "scripts/deploy.sh",
     "scripts/probes/",
     "deploy/",
+    "compose.yaml",
+    "docs/",
     "tests/*.mjs",
     "unify.yaml",
     "config.json",
@@ -38,7 +40,7 @@
     "retain:health": "bun scripts/retain-health.mjs"
   },
   "devDependencies": {
-    "@fwdslsh/unify": "^0.10.1"
+    "@fwdslsh/unify": "^0.11.0"
   },
   "publishConfig": {
     "access": "public"

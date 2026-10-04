@@ -28,9 +28,10 @@ export function allowedWindow(item, now = new Date()) {
 }
 export function validateConfig(input) {
   keys(input, ['site', 'reports', 'hosts', 'endpoints', 'thresholds', 'backups', 'exclusions'], 'config.json');
-  for (const [key, allowed] of [['site', ['brand', 'title', 'description', 'footer', 'prefix', 'badge', 'filesUrl', 'filesLabel']], ['reports', ['prefix', 'timezone', 'weeklyKeep']], ['thresholds', ['memoryWarningPercent', 'diskWarningPercent', 'criticalPercent', 'loadPerCore', 'staleAfterMinutes']], ['backups', ['jobs', 'expectations']], ['exclusions', ['containers', 'endpoints', 'backups']]]) if (key in input) keys(input[key], allowed, key);
+  const siteKeys = ['brand', 'title', 'description', 'footer', 'prefix', 'badge', 'filesUrl', 'filesLabel', 'homeLabel', 'articlesDescription', 'incidentsDescription', 'healthDescription', 'healthIntro', 'reportsDescription', 'reportsIntro', 'directoryDescription', 'sitemapDescription'];
+  for (const [key, allowed] of [['site', siteKeys], ['reports', ['prefix', 'timezone', 'weeklyKeep']], ['thresholds', ['memoryWarningPercent', 'diskWarningPercent', 'criticalPercent', 'loadPerCore', 'staleAfterMinutes']], ['backups', ['jobs', 'expectations']], ['exclusions', ['containers', 'endpoints', 'backups']]]) if (key in input) keys(input[key], allowed, key);
   const site = { brand: 'My lab', title: 'Lab reports', description: 'Lab reports and dashboard', footer: 'Private lab reports', prefix: '/', badge: 'Lab', filesUrl: '', filesLabel: 'Shared files', ...input.site };
-  keys(site, ['brand', 'title', 'description', 'footer', 'prefix', 'badge', 'filesUrl', 'filesLabel'], 'site');
+  keys(site, siteKeys, 'site');
   if (Object.values(site).some(v => typeof v !== 'string')) throw new Error('Site settings must be text');
   if (site.filesUrl && !(site.filesUrl.startsWith('/') && !site.filesUrl.startsWith('//'))) httpURL(site.filesUrl);
   const reports = { prefix: 'lab', timezone: 'UTC', weeklyKeep: 2, ...input.reports };

@@ -2,7 +2,11 @@ import { test, expect } from 'bun:test';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { plan, apply, git } from '../scripts/retain-health.mjs';
+import { plan as rawPlan, apply as rawApply, git } from '../scripts/retain-health.mjs';
+import { validateConfig } from '../scripts/config.mjs';
+const fixturePolicy = validateConfig({}).reports;
+const plan = (root, now, reports = fixturePolicy) => rawPlan(root, now, reports);
+const apply = (root, now, commit = false, reports = fixturePolicy) => rawApply(root, now, commit, reports);
 const now = new Date('2026-10-01T18:00:00Z');
 function fixture() {
   const repo = mkdtempSync(join(tmpdir(), 'retention.')), root = join(repo, 'reports'); mkdirSync(root);

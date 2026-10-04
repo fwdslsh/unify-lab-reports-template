@@ -58,8 +58,7 @@ echo "reports-site: building $REVISION"
 git --git-dir="$CACHE" archive "$REVISION" | tar -xf - -C "$WORK"
 (
   cd "$WORK"
-  "$BUN" install --frozen-lockfile --ignore-scripts
-  "$BUN" run build -- -o "$RELEASE"
+  "$BUN" "${UNIFY:-$(dirname "${BASH_SOURCE[0]}")/../node_modules/@fwdslsh/unify/src/cli.js}" build --clean --audit --strict -o "$RELEASE"
 )
 [ -s "$RELEASE/index.html" ] && [ -s "$RELEASE/status.html" ] &&
   [ -s "$RELEASE/reports/index.html" ] && [ -s "$RELEASE/sitemap.html" ] && [ -s "$RELEASE/styles.css" ] || {

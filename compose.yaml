@@ -3,7 +3,7 @@ services:
   builder:
     image: reports-site-builder:1
     build:
-      context: ${BUILD_CONTEXT:-..}
+      context: ${BUILD_CONTEXT:-.}
       dockerfile: deploy/Dockerfile
       args:
         PUBLISH_UID: ${PUBLISH_UID:-1000}
@@ -15,16 +15,16 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     env_file:
-      - path: ${SITE_ENV_FILE:-../.env}
+      - path: ${SITE_ENV_FILE:-.env}
         required: false
     environment:
       REPO_URL: ${REPO_URL:?Set YOUR site Git URL}
       BRANCH: ${BRANCH:-main}
       GIT_SSH_COMMAND: ssh -i /run/ssh/git_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/run/ssh/known_hosts -o BatchMode=yes -o ConnectTimeout=10
     volumes:
-      - ${STATE_PATH:-../state}:/state
-      - ${PUBLISH_PATH:-../published}:/publish
-      - ${SSH_PATH:-../ssh}:/run/ssh:ro
+      - ${STATE_PATH:-./state}:/state
+      - ${PUBLISH_PATH:-./published}:/publish
+      - ${SSH_PATH:-./ssh}:/run/ssh:ro
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m
     mem_limit: 1g

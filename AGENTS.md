@@ -1,5 +1,10 @@
 # Lab reports template
 
+For server installation follow docs/agent-install.md and DEPLOY.md. Docker
+hosts need Git/Compose, not Bun. For configuration use docs/configuration.md;
+for template ownership/update limits use docs/template-updates.md. Never rerun
+init over operator data or claim a nonexistent update command works.
+
 Keep this a normal Unify project. site/ is authored source; generators write
 only Unify's overlay. site/index.html is explicit, includes/ is flat, and
 config.json is the only site/lab configuration file. Do not add a custom
@@ -16,6 +21,6 @@ search and mobile bottom navigation. Missing evidence stays unknown. Running
 is not healthy, HTTP success is not authenticated readiness, and backup success
 is not a restore test.
 
-Verify bun run test, bun run check, bun run build, shell syntax, Compose and
+Verify bun run test, bun run check, bun run build, shell syntax, root Compose and
 the npm payload. Do not change an existing lab's production site through this
 template. No npm publication without explicit authorization and release gates.

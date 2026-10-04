@@ -8,6 +8,7 @@ ARG PUBLISH_GID=1000
 RUN (getent group "$PUBLISH_GID" || groupadd --gid "$PUBLISH_GID" reports-site) \
     && (getent passwd "$PUBLISH_UID" || useradd --uid "$PUBLISH_UID" --gid "$PUBLISH_GID" --no-create-home --home-dir /state reports-site)
 WORKDIR /app
+RUN bun add --exact --ignore-scripts @fwdslsh/unify@0.11.0
 COPY scripts/ /app/scripts/
 COPY deploy/poll.sh /app/poll.sh
 USER ${PUBLISH_UID}:${PUBLISH_GID}

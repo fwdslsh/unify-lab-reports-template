@@ -28,7 +28,7 @@ test('real npm payload excludes private state and builds with only shipped files
     }
     const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author));
     const names = packed.files.map(file => file.path);
-    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
+    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'compose.yaml', 'docs/agent-install.md', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
     expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);
@@ -52,6 +52,27 @@ test('real npm payload excludes private state and builds with only shipped files
     function files(path) { return readdirSync(path, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? files(join(path, entry.name)) : [join(path, entry.name)]); }
     for (const file of files(project).filter(path => !path.includes('/node_modules/'))) expect(readFileSync(file, 'utf8')).not.toContain(secret);
   } finally { rmSync(temp, { recursive: true, force: true }); }
+}, 60000);
+
+test('native npm template source initializes the real tarball without publishing to a registry', async () => {
+  const temp = mkdtempSync(join(tmpdir(), 'lab-template-npm-init.'));
+  let registry;
+  try {
+    const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], root));
+    const spec = packed.name + '@' + packed.version;
+    registry = Bun.serve({ hostname: '127.0.0.1', port: 0, fetch(request) {
+      if (new URL(request.url).pathname === '/template.tgz') return new Response(Bun.file(join(temp, packed.filename)));
+      return Response.json({ name: packed.name, 'dist-tags': { latest: packed.version }, versions: { [packed.version]: { name: packed.name, version: packed.version, dist: { tarball: `http://127.0.0.1:${registry.port}/template.tgz` } } } });
+    } });
+    const project = join(temp, 'project'); mkdirSync(project);
+    const cli = join(root, 'node_modules/@fwdslsh/unify/src/cli.js');
+    const child = Bun.spawn(['bun', cli, 'init', spec], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await child.exited, await new Response(child.stderr).text()).toBe(0);
+    expect(readFileSync(join(project, 'compose.yaml'), 'utf8')).toContain('${STATE_PATH:-./state}');
+    expect(readFileSync(join(project, 'docs/agent-install.md'), 'utf8')).toContain('Docker');
+    const build = run('bun', [cli, 'build', '--clean', '--audit', '--strict'], project);
+    expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Not collected');
+  } finally { registry?.stop(true); rmSync(temp, { recursive: true, force: true }); }
 }, 60000);
 
 test('explicit collection probes local HTTP but never stores response bodies', async () => {

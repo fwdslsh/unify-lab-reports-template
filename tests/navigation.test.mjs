@@ -49,13 +49,30 @@ test('flat includes, explicit homepage and original responsive theme are normal 
   for (const label of ['Reports', 'Guides', 'Articles', 'All pages']) expect(nav).toContain(`<span>${label}</span>`);
   expect(css).toContain('--primary: #3fb950'); expect(css).toContain('env(safe-area-inset-bottom'); expect(css).toContain('position: fixed'); expect(css).toContain('min-height: 56px');
 });
+test('site-owned section copy and home label survive shared generator updates', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'custom-section-copy.'));
+  try {
+    const site = { homeLabel: 'My dashboard', articlesDescription: 'Custom articles', healthDescription: 'Custom health', healthIntro: 'Custom health intro', reportsDescription: 'Custom report metadata', reportsIntro: 'Custom report intro', directoryDescription: 'Custom directory metadata', sitemapDescription: 'Custom sitemap metadata', incidentsDescription: 'Custom incidents' };
+    generate(temp, inventory([]), validateConfig({ site }), { observed_at: null, hosts: {}, endpoints: [] });
+    expect(readFileSync(join(temp, 'articles/index.html'), 'utf8')).toContain('Custom articles');
+    expect(readFileSync(join(temp, 'health/index.html'), 'utf8')).toContain('Custom health intro');
+    expect(readFileSync(join(temp, 'reports/index.html'), 'utf8')).toContain('Custom report intro');
+    expect(readFileSync(join(temp, 'sitemap.html'), 'utf8')).toContain('Custom sitemap metadata');
+    expect(readFileSync(join(temp, '_generated/brand.html'), 'utf8')).toContain('My dashboard');
+  } finally { rmSync(temp, { recursive: true, force: true }); }
+});
 function project() {
   const path = mkdtempSync(join(tmpdir(), 'unify-project.'));
-  for (const name of ['site', 'scripts', 'includes', 'config.json', 'unify.yaml', 'package.json', 'bun.lock']) cpSync(join(root, name), join(path, name), { recursive: true, filter: source => !source.includes('__pycache__') });
+  for (const name of ['scripts', 'includes', 'config.json', 'unify.yaml', 'package.json', 'bun.lock']) cpSync(join(root, name), join(path, name), { recursive: true });
+  mkdirSync(join(path, 'site'));
+  for (const name of ['_layout.html', 'styles.css', 'assets']) cpSync(join(root, 'site', name), join(path, 'site', name), { recursive: true });
   const env = fixtureEnvironment();
   const run = args => spawnSync('bun', args, { cwd: path, env, encoding: 'utf8' });
   const install = run(['install', '--frozen-lockfile', '--ignore-scripts']); expect(install.status, install.stderr).toBe(0);
   const write = (name, text) => { const file = join(path, 'site', name); mkdirSync(join(file, '..'), { recursive: true }); writeFileSync(file, text); };
+  write('index.html', '<!doctype html><html lang="en"><head><title>Lab dashboard</title><meta name="description" content="Lab observations"></head><body class="wide"><include src="/_generated/dashboard.html"></include></body></html>');
+  write('docs/index.md', '---\ntitle: Guides\ndescription: Lab guide\n---\n# Guides\n[Backups](services/backups.html)\n');
+  write('docs/services/backups.md', '---\ntitle: Backups\ndescription: Backup guide\n---\n# Backups\n');
   const html = name => readFileSync(join(path, 'dist', name), 'utf8');
   return { path, env, run, write, html, close: () => rmSync(path, { recursive: true, force: true }) };
 }
