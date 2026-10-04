@@ -8,52 +8,56 @@ not a second installer. Complete each verification before reporting success.
 Ask only for missing information:
 
 - Server/SSH target and authorized deployment account.
-- Dedicated project directory and the site's writable Git repository.
+- Dedicated project directory and template source (directory, Git URL or published npm package).
 - Desired URL and whether it is LAN-only or otherwise access-controlled.
-- Existing static-server container, Compose project and configuration path.
+- Existing static host/container and configuration path.
 - Lab name and initial endpoints; collection may remain off initially.
+- Whether automatic Git-backed publication is wanted; default to native Unify.
 
-If starting from a template, create the user's own site repository first. The
-builder must fetch that repository, not the pristine upstream template. No npm
-publication, host services or unrelated infrastructure changes are implied.
+Do not require a site repository, Docker builder or .env for normal installation.
+No npm publication, host services or unrelated infrastructure changes are implied.
 
 ## Install
 
-1. Read repository AGENTS.md and check the server: Docker/Compose versions,
-   account UID/GID, existing containers, chosen directory and Git access. Do
-   not overwrite an existing installation or dirty checkout.
-2. Clone the user's site repository. For native Unify initialization use an
-   empty project and a supported directory/Git/npm source; never run init over
-   existing files. Native init does not copy root package manifests/lockfiles.
-   Docker deployment does not need them or host Bun.
-3. Edit config.json with reviewed non-secret lab identity/endpoints. Commit
-   exact paths and push. Preserve all existing content and settings.
-4. Copy the non-secret .env.example to ignored .env only if absent, then set
-   REPO_URL. Preserve an existing .env. For private Git arrange a repo-scoped
-   read-only deploy key and independently verified host keys. Do not paste
-   tokens into URLs, logs, reports or prompts. Do not auto-trust ssh-keyscan.
-5. Create only the dedicated state, published and ssh directories. Match the
-   builder UID/GID to their owner; do not recursively chown unrelated paths.
-   Verify key permissions and the web-server read boundary.
-6. Run docker compose config --quiet, then docker compose up -d --build.
-   Check logs for the first successful publication and verify generated
-   index.html/deployment.json. A running container alone is not success.
-7. Add the read-only parent published mount and site route to the existing
-   static server. Preserve unrelated routes, TLS, DNS and LAN restrictions.
-   Validate first. Recreate only that service for mount changes, otherwise
-   reload configuration. Stop if the required change exceeds approved scope.
-8. Verify the real URL and deployment revision. Manually check dashboard,
-   Reports, Guides, Articles, All pages/search and mobile navigation. Confirm
-   config.json, .env and state are not served. Noindex is not access control.
-9. Push a small approved report/config change. Verify that a later successful
-   poll serves its new revision while Caddy remains available.
+1. Read AGENTS.md and check the chosen directory and hosting boundary. Do not
+   overwrite an existing installation or dirty checkout. Install/check Bun 1.4+
+   and Unify 0.11+ on the build machine, not necessarily on the hosting server.
+2. Run native unify init with the chosen template source in an empty project.
+   Directory sources must contain only clean template files; ignored runtime
+   data is not excluded automatically. Native init skips root package manifests
+   and lockfiles. Use unify directly; do not add an installer wrapper.
+3. Edit config.json with reviewed non-secret lab identity/endpoints and add
+   authored content under site/. Preserve existing settings/content on later edits.
+4. Run unify build --clean --audit --strict. Verify dist/index.html and the
+   generated navigation. A successful command alone is not the final check.
+5. Serve/upload only dist/ with the existing static host. For a Docker web server,
+   use a read-only output mount. Preserve routes, TLS, DNS and LAN restrictions;
+   validate before reload/recreation. Never serve the project root.
+6. Verify the real URL: dashboard, Reports, Guides, Articles, All pages/search
+   and mobile navigation. Confirm config.json, .env and state are not served.
+   Noindex is not access control. Keep backups of source/config and previous output.
+
+## Automatic Git publishing (optional)
+
+Only if requested, put the initialized site in the user's own repository and
+follow DEPLOY.md's optional Docker publisher steps. It must fetch the user's
+site, not the pristine template. Docker hosts need Git/Compose, not host Bun.
+
+Preserve an existing .env; set REPO_URL only for this workflow. For private Git,
+use repo-scoped read-only credentials and independently verified host keys.
+Never put tokens in URLs/logs or auto-trust ssh-keyscan. Create only dedicated
+state/published/ssh directories with the configured UID/GID. Validate Compose,
+start the builder, then check publication logs and deployment.json. Verify that
+an approved pushed change publishes on a later poll while the last site remains
+available. No native host background service is needed.
 
 ## Add observations (optional)
 
-Start with endpoints. Set COLLECT=true, recreate only builder, and verify a new
-observation timestamp and honest responding/down indicators. For host facts,
-add explicit SSH targets, including the Docker host; otherwise “local” means
-the builder container. Use native account permissions and verified host keys.
+Start with endpoints. Run bun scripts/collect.mjs and rebuild, then verify the
+observation timestamp and honest responding/down indicators. With the optional
+Git publisher, set COLLECT=true and recreate only builder instead. For host facts,
+use explicit SSH targets; otherwise “local” is the machine/container executing
+collection. Use native account permissions and verified host keys.
 
 Do not grant Docker-group access or blanket sudo just to make indicators green.
 Docker access is powerful host control. Unsupported/unavailable checks should
@@ -63,8 +67,8 @@ jobs and distinguish successful backups from tested restores.
 
 ## Handoff
 
-Record the site URL, repo/branch/revision, project directory, Compose project,
-static-server output mount and whether collection is enabled. List any checks
+Record the site URL, source directory, static-server output mount and collection
+method. Include repo/branch/revision and Compose project only when used. List any checks
 that remain unknown. Point to management/rollback commands in DEPLOY.md and
 the files that need backup. Never include credential values.
 

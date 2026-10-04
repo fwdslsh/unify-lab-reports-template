@@ -1,7 +1,8 @@
 # Configuration
 
-Edit **config.json**, commit and push. No template update should replace this
-file. Defaults apply to settings you omit. Credentials belong in private files,
+Edit **config.json**, then rebuild with `unify build`. Only the optional Git
+publisher needs changes committed and pushed. No template update should replace
+this file. Defaults apply to settings you omit. Credentials belong in private files,
 not in config.json or site content.
 
 ## Start small
@@ -16,8 +17,9 @@ not in config.json or site content.
 }
 ```
 
-Enable COLLECT in deployment settings when ready. Hosts/endpoints may be empty;
-without observations the dashboard says “Not collected.”
+Collect explicitly with `bun scripts/collect.mjs`, then rebuild. For the optional
+Docker publisher, enable COLLECT in deployment settings instead. Hosts/endpoints
+may be empty; without observations the dashboard says “Not collected.”
 
 ## Add hosts or backups
 
@@ -52,9 +54,11 @@ URL composition/build options belong in standard unify.yaml. For a site hosted
 below a URL path, configure Unify's base-url/pretty-urls there; do not change
 site.prefix expecting it to rewrite URLs.
 
-## Docker settings (private .env)
+## Optional Git publisher settings (private .env)
 
-Only REPO_URL is required. Compose reads .env beside root compose.yaml.
+These settings are not needed for native Unify builds or static hosting.
+REPO_URL is required only by the optional Git publisher. Compose reads .env
+beside root compose.yaml.
 
 | Optional key | Default / purpose |
 | --- | --- |

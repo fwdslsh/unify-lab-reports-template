@@ -1,11 +1,33 @@
-# Install and manage with Docker
+# Publish and manage
 
-Use a dedicated clone of YOUR site's Git repository. This starts one builder
+## Native static hosting
+
+Initialize with `unify init` as shown in [README.md](README.md#install-with-unify).
+Edit config.json and site/, then run:
+
+```sh
+unify build --clean --audit --strict
+```
+
+Serve or upload only dist/ using your existing static host. For Caddy, mount
+that output directory read-only and point its root there. Do not serve the
+project root: it contains configuration and may contain private files. Keep
+existing DNS, TLS and access restrictions. Rebuild and replace the hosted output
+when content changes; keep a copy of the previous output for rollback.
+
+This path needs no site Git repository, Docker builder, .env or REPO_URL. Back
+up your authored site/ and config.json with your normal backup tool. For a local
+preview use unify dev, not a production/public development server.
+
+## Optional: Git-backed Docker publisher
+
+For automatic Git updates, use a dedicated clone of YOUR site's repository.
+This optional workflow starts one builder
 container with no public ports; your existing web server serves its output.
 Git and Docker Compose are the only host prerequisites. No host cron/systemd or
 Bun installation is needed.
 
-## 1. Prepare
+### 1. Prepare
 
 Clone the site to its chosen directory and work from that root. Edit and commit
 `config.json` and content, then push. The builder always reads the fetched revision,
@@ -26,7 +48,7 @@ UID/GID 1000. If different, set `PUBLISH_UID`/`PUBLISH_GID` in `.env` to match
 `id -u`/`id -g`. Do not recursively change an existing directory's ownership.
 Directories must be dedicated to this site and readable by the web server.
 
-## 2. Start
+### 2. Start
 
 ```sh
 docker compose up -d --build
@@ -42,7 +64,7 @@ Wait for the first “published” message and `published/current/index.html`.
 Unchanged inputs do not rebuild. Failed fetch/builds retry and retain the last
 successful release. Container health measures publishing checks, not lab health.
 
-## 3. Serve with existing Caddy
+### 3. Serve with existing Caddy
 
 Add this read-only mount to your EXISTING Caddy service, using your actual
 absolute project path. Mount the parent output directory, not the `current`
@@ -69,7 +91,7 @@ Do not expose a private dashboard publicly: noindex is not access control.
 If no static server exists, choose/install one separately; the builder is not
 an HTTP server. See [Caddy static serving](https://caddyserver.com/docs/caddyfile/directives/file_server).
 
-## 4. Verify
+### 4. Verify
 
 ```sh
 curl -fsS https://reports.example.net/deployment.json
@@ -81,7 +103,7 @@ Reports, Guides, Articles and All pages must work. Try search and mobile navigat
 Push a small reviewed content change and confirm the revision changes after the
 next poll. Do not equate container-running with successful publication.
 
-## Optional: observations
+### Optional: observations in the publisher
 
 Add endpoints to `config.json`, commit/push, set `COLLECT=true` in `.env`, then:
 
@@ -105,6 +127,9 @@ avoid probing sleeping machines. [Configuration](docs/configuration.md) links
 host and backup examples. Collection defaults to every 30 minutes.
 
 ## Manage
+
+The commands below apply to the optional Git-backed Docker publisher. Native
+sites use edit → unify build → deploy dist/; no commit or push is required.
 
 | Task | Action |
 | --- | --- |

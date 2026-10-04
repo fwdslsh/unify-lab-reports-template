@@ -1,7 +1,8 @@
 # Lab reports template
 
-For server installation follow docs/agent-install.md and DEPLOY.md. Docker
-hosts need Git/Compose, not Bun. For configuration use docs/configuration.md;
+Native unify init is the primary installation path. A site repository, Docker
+and automatic publishing are optional. Follow docs/agent-install.md and DEPLOY.md.
+Only Git-backed Docker publishing needs Git/Compose, not host Bun. For configuration use docs/configuration.md;
 for template ownership/update limits use docs/template-updates.md. Never rerun
 init over operator data or claim a nonexistent update command works.
 

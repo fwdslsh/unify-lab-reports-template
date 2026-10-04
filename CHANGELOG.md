@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Docker-first setup, root compose.yaml and minimal config/deployment examples.
+- Native Unify-first setup; Git-backed Docker publishing is optional.
+- Root compose.yaml and minimal config/deployment examples.
 - Agent installation runbook and one management/configuration reference.
 - Unify 0.11 native custom-template initialization; pinned image-baked build tool.
 - Documented site-owned customizations and native update limitation.

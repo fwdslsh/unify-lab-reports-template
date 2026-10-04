@@ -27,10 +27,11 @@ not update this template, and deleting settings to make it succeed is wrong.
 
 Native updates are requested in [Unify issue #109](https://github.com/fwdslsh/unify/issues/109).
 
-Until native updates exist, use normal Git review to apply selected template
-changes. Compare the template revision already adopted with the new revision,
-preserve site-owned files, run tests/build, commit and push the site's changes,
-then rebuild the builder image when tooling changes. No reconfiguration is needed.
+Until native updates exist, back up the site and compare/apply selected template
+changes manually. Git diff/review is helpful when used, but a site repository is
+not required. Preserve site-owned files and build/test before publishing. Only
+Git-backed publishers need a commit/push and an image rebuild when tooling changes.
+No reconfiguration is needed.
 
 Do not use a blanket copy, rsync --delete, forced checkout or undocumented init
 flag. Modified shared files require an explicit merge, not silent replacement.
