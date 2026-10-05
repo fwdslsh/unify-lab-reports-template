@@ -30,7 +30,7 @@ export function validateConfig(input) {
   keys(input, ['site', 'reports', 'hosts', 'endpoints', 'thresholds', 'backups', 'exclusions'], 'config.json');
   const siteKeys = ['brand', 'title', 'description', 'footer', 'prefix', 'badge', 'filesUrl', 'filesLabel', 'homeLabel', 'articlesDescription', 'incidentsDescription', 'healthDescription', 'healthIntro', 'reportsDescription', 'reportsIntro', 'directoryDescription', 'sitemapDescription'];
   for (const [key, allowed] of [['site', siteKeys], ['reports', ['prefix', 'timezone', 'weeklyKeep']], ['thresholds', ['memoryWarningPercent', 'diskWarningPercent', 'criticalPercent', 'loadPerCore', 'staleAfterMinutes']], ['backups', ['jobs', 'expectations']], ['exclusions', ['containers', 'endpoints', 'backups']]]) if (key in input) keys(input[key], allowed, key);
-  const site = { brand: 'lab', title: 'Lab reports', description: 'Lab reports and dashboard', footer: 'Private lab reports', prefix: '/', badge: 'Lab', filesUrl: '', filesLabel: 'Shared files', ...input.site };
+  const site = { brand: 'home', title: 'Lab reports', description: 'Lab reports and dashboard', footer: 'Private lab reports', prefix: '/', badge: 'Lab', filesUrl: '', filesLabel: 'Shared files', ...input.site };
   keys(site, siteKeys, 'site');
   if (Object.values(site).some(v => typeof v !== 'string')) throw new Error('Site settings must be text');
   if (site.filesUrl && !(site.filesUrl.startsWith('/') && !site.filesUrl.startsWith('//'))) httpURL(site.filesUrl);

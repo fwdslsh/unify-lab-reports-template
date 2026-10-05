@@ -25,7 +25,7 @@ test('generation is repeatable, escapes search data, and includes historical rep
     const pages = inventory([record('index.html', 'Lab dashboard'), record('old.html', 'Old & <new>', [{ name: 'role', content: 'history' }]), record('articles/series2.md', 'Second', [{ name: 'series', content: 'Series' }, { name: 'part', content: '2' }]), record('articles/series1.md', 'First', [{ name: 'series', content: 'Series' }, { name: 'part', content: '1' }]), record('old-bookmark.html', 'Archived bookmark', [{ name: 'role', content: 'bookmark' }])]);
     const config = validateConfig({}), snapshot = { observed_at: null, hosts: {}, endpoints: [] };
     generate(temp, pages, config, snapshot);
-    expect(readFileSync(join(temp, '_generated/brand.html'), 'utf8')).toContain('<span>/</span>lab</a>');
+    expect(readFileSync(join(temp, '_generated/brand.html'), 'utf8')).toContain('<span>/</span>home</a>');
     const reports = readFileSync(join(temp, 'reports/index.html'), 'utf8'), sitemap = readFileSync(join(temp, 'sitemap.html'), 'utf8'), articles = readFileSync(join(temp, 'articles/index.html'), 'utf8');
     expect(reports).toContain('Old &amp; &lt;new&gt;'); expect(reports).not.toContain('<time'); expect(reports).not.toContain('Archived bookmark');
     expect(sitemap).toContain('Archived bookmark'); expect(sitemap).toContain('Other pages and bookmarks'); expect(sitemap).toContain('<noscript>'); expect(sitemap).toContain('data-search=');
