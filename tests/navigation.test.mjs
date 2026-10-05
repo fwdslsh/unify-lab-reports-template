@@ -47,6 +47,9 @@ test('the one retention setting controls both generation and retention', () => {
 test('authored chrome, dashboard template and original responsive theme are normal source', () => {
   const layout = readFileSync(join(root, 'site/_layout.html'), 'utf8'), nav = readFileSync(join(root, 'site/_includes/nav.html'), 'utf8'), css = readFileSync(join(root, 'site/styles.css'), 'utf8');
   expect(layout).toContain('/_includes/header.html'); expect(layout).not.toContain('_generated/'); expect(existsSync(join(root, 'site/_includes/dashboard.fragment.html'))).toBe(true);
+  const header = readFileSync(join(root, 'site/_includes/header.html'), 'utf8');
+  expect(header).toContain('<span>/</span>home</a>');
+  expect(header).not.toContain('class="tag"');
   for (const label of ['Reports', 'Guides', 'Articles', 'All pages']) expect(nav).toContain(`<span>${label}</span>`);
   expect(css).toContain('--primary: #3fb950'); expect(css).toContain('env(safe-area-inset-bottom'); expect(css).toContain('position: fixed'); expect(css).toContain('min-height: 56px');
   expect(css).toContain('@layer base, theme;');

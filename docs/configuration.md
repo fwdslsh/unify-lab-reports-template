@@ -36,7 +36,7 @@ whole configuration. Native remote probes need no Python or Node.
 
 | Edit | Source file |
 | --- | --- |
-| Brand, home link and badge | site/_includes/header.html |
+| Brand and home link | site/_includes/header.html |
 | Navigation | site/_includes/nav.html |
 | Footer and optional shared-files link | site/_includes/footer.html |
 | Palette and fonts (protected during template updates) | site/assets/theme.css |
