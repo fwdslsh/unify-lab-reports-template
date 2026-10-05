@@ -32,6 +32,10 @@ Test update/adoption, dry-run/no-op behavior and local-edit conflicts alongside
 native directory/Git/npm initialization. Config, content and private state must
 remain byte-identical when shared tools change. The native updater owns all
 record writes; do not add a wrapper, forced merge or automated runtime update.
+Template packaging/init/update tests live under .github/tests/; tests/ contains
+only shared site tests. A private site's test command must not require the
+template's npm identity or starter content. Maintainer-only tests are not part
+of the npm template payload.
 
 ## GitHub mirror and npm release
 

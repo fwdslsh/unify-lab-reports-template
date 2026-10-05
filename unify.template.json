@@ -1,5 +1,7 @@
 {
   "owned": [
+    "README.md",
+    "CHANGELOG.md",
     "config.json",
     "unify.yaml",
     "compose.yaml",

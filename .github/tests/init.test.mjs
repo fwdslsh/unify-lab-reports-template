@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { fixtureEnvironment } from './fixture-env.mjs';
-const root = fileURLToPath(new URL('../', import.meta.url));
+import { fixtureEnvironment } from '../../tests/fixture-env.mjs';
+const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = join(root, 'node_modules/@fwdslsh/unify/src/cli.js');
 const run = (args, cwd) => spawnSync('bun', [cli, ...args], { cwd, env: fixtureEnvironment(), encoding: 'utf8' });
 const hashes = dir => Object.fromEntries(readdirSync(dir, { withFileTypes: true }).flatMap(e => {

@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { fixtureEnvironment } from './fixture-env.mjs';
+import { fixtureEnvironment } from '../../tests/fixture-env.mjs';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+const root = fileURLToPath(new URL('../../', import.meta.url));
 const cli = join(root, 'node_modules/@fwdslsh/unify/src/cli.js');
 const clean = path => !path.slice(root.length).split('/').some(p => ['node_modules', '.git', 'dist', 'state', 'published', 'ssh', '.env', '__pycache__'].includes(p) || p.endsWith('.tgz'));
 const write = (path, content) => { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, content); };

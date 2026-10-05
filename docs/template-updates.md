@@ -28,7 +28,7 @@ author's owned-only manifest over it. It is not a second lab configuration file.
 
 | Keep local | Update from template after review |
 | --- | --- |
-| config.json, unify.yaml, compose.yaml | scripts/ and tests/ |
+| config.json, unify.yaml, compose.yaml, project README/changelog | scripts/ and site tests/ |
 | authored articles, incidents, reviews and guides | deploy/ and setup documentation |
 | observation state and published output | shared includes/layout/navigation |
 | site-specific package identity/build flags | setup/reference documentation |

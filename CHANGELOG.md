@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Separate template-maintainer tests from reusable site tests; preserve site README/changelog on native updates.
 - Public GitHub mirror and GitHub-only, tag-gated npm trusted-publishing workflow.
 - Native Unify-first setup; Git-backed Docker publishing is optional.
 - Root compose.yaml and minimal config/deployment examples.

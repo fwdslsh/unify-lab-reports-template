@@ -44,7 +44,7 @@
     "check": "unify build --dry-run --strict",
     "build": "unify build --clean --audit --strict",
     "audit": "unify audit --strict",
-    "test": "bun test tests/*.test.mjs",
+    "test": "bun test tests/*.test.mjs ./.github/tests/*.test.mjs",
     "collect": "bun scripts/collect.mjs",
     "retain:health": "bun scripts/retain-health.mjs"
   },

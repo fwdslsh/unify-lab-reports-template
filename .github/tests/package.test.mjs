@@ -5,9 +5,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
-import { fixtureEnvironment } from './fixture-env.mjs';
+import { fixtureEnvironment } from '../../tests/fixture-env.mjs';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+const root = fileURLToPath(new URL('../../', import.meta.url));
 function run(command, args, cwd, overrides = {}) {
   const result = spawnSync(command, args, { cwd, env: { ...fixtureEnvironment(), ...overrides }, encoding: 'utf8' });
   expect(result.status, result.stderr + result.stdout).toBe(0);
