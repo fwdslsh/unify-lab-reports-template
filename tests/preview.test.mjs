@@ -21,13 +21,15 @@ test('native source previews resolve every authored include without a build or o
       expect(preview.html, relPath).toContain('/styles.css');
     }
     expect(existsSync(join(project, 'dist'))).toBe(false);
-    const md = await renderPreview({ sourceRoot, roots, relPath: '_layout.html', page: 'articles/welcome.md', config: false });
+    writeFileSync(join(sourceRoot, '_includes/footer.html'), '<p>Preview default footer</p>');
+    writeFileSync(join(sourceRoot, 'preview.md'), '---\ntitle: Preview\ndescription: Preview fixture\n---\n# Markdown main content\n');
+    const md = await renderPreview({ sourceRoot, roots, relPath: '_layout.html', page: 'preview.md', config: false });
     expect(md.status).toBe(200); expect(md.html).not.toContain('unify-preview-problems');
-    expect(md.html).toContain('Private lab reports'); expect(md.html).toContain('home</a>');
+    expect(md.html).toContain('Preview default footer'); expect(md.html).toContain('Markdown main content');
     writeFileSync(join(sourceRoot, 'example.html'), '<!doctype html><html><head><title>Custom page</title><meta name="description" content="A custom page"></head><body><div slot="brand">Custom brand</div><p slot="footer">Custom footer</p><h1>Main content</h1></body></html>');
     const html = await renderPreview({ sourceRoot, roots, relPath: '_layout.html', page: 'example.html', config: false });
     expect(html.status).toBe(200); expect(html.html).not.toContain('unify-preview-problems');
     expect(html.html).toContain('Custom brand'); expect(html.html).toContain('Custom footer'); expect(html.html).toContain('Main content');
-    expect(html.html).not.toContain('Private lab reports'); expect(html.html).not.toContain('<slot');
+    expect(html.html).not.toContain('Preview default footer'); expect(html.html).not.toContain('<slot');
   } finally { rmSync(project, { recursive: true, force: true }); }
 });
