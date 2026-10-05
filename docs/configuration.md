@@ -39,6 +39,7 @@ whole configuration. Native remote probes need no Python or Node.
 | Brand, home link and badge | site/_includes/header.html |
 | Navigation | site/_includes/nav.html |
 | Footer and optional shared-files link | site/_includes/footer.html |
+| Palette and fonts (protected during template updates) | site/assets/theme.css |
 | Default site title/description, page shell | site/_layout.html |
 | Section titles/descriptions | site/_includes/*-head.html |
 | Section headings, introductions and empty states | site/_includes/*.fragment.html |

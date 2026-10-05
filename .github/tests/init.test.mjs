@@ -33,6 +33,10 @@ for (const form of ['directory', 'git']) test(`native ${form} init builds withou
     expect(existsSync(join(site, 'config.json'))).toBe(false);
     expect(existsSync(join(site, 'unify.template.json'))).toBe(false);
     expect(readFileSync(join(site, 'unify.yaml'), 'utf8')).toContain('template:');
+    const settings = readFileSync(join(site, 'unify.yaml'), 'utf8');
+    expect(settings).toContain('source:');
+    for (const path of ['unify.yaml', 'site/assets/theme.css', 'site/_includes/header.html', 'site/_includes/footer.html']) expect(settings).toContain('- ' + path);
+    expect(existsSync(join(site, 'site/assets/theme.css'))).toBe(true);
     const built = run(['build', '--clean', '--audit', '--strict'], site); expect(built.status, built.stderr).toBe(0);
     expect(readFileSync(join(site, 'dist/index.html'), 'utf8')).toContain('Not collected');
     expect(readFileSync(join(site, 'dist/docs/index.html'), 'utf8')).toContain('Observed inventory');

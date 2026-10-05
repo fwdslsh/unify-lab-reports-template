@@ -57,7 +57,7 @@ docker compose ps
 docker compose logs --tail 40 builder
 ```
 
-The image contains pinned Unify 0.11.5. The builder does not install dependencies
+The image contains pinned Unify 0.11.6. The builder does not install dependencies
 at startup or on each publication. An initial build needs network access during
 image construction; content builds need only Git access.
 

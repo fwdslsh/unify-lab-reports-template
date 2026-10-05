@@ -1,6 +1,12 @@
 # Static navigation remains usable without JavaScript, including old bookmarks.
 # Unify defaults to site/ and supplies source inventory when a generator is set.
 # Config paths resolve from this file's directory, not the source directory.
+template:
+  keep:
+    - unify.yaml
+    - site/assets/theme.css
+    - site/_includes/header.html
+    - site/_includes/footer.html
 generate: scripts/gen.mjs
 # Search only the rendered, published content; keep robots noindex unchanged.
 search-corpus: true

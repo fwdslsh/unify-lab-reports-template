@@ -1,7 +1,11 @@
-/* Lab reports — single shared stylesheet.
+/* Lab reports — shared base stylesheet.
    MIT licensed fwdslsh visual theme.
    No JavaScript; light/dark via prefers-color-scheme. */
 
+@layer base, theme;
+@import url("assets/theme.css") layer(theme);
+
+@layer base {
 :root {
   color-scheme: light dark;
   --bg: #0a0e0a;
@@ -483,4 +487,5 @@ ul.reports .entry-meta { grid-column: 2; grid-row: 1 / span 2; align-self: start
   .status .tabwrap td:nth-child(3)::before { content: 'HTTP '; font-size: 0.65rem; }
   .status .tabwrap td:nth-child(4) { grid-column: 2; grid-row: 2; white-space: nowrap; }
   .status .tabwrap code { border: none; background: none; padding: 0; font-size: 0.78rem; }
+}
 }

@@ -49,6 +49,12 @@ test('authored chrome, dashboard template and original responsive theme are norm
   expect(layout).toContain('/_includes/header.html'); expect(layout).not.toContain('_generated/'); expect(existsSync(join(root, 'site/_includes/dashboard.fragment.html'))).toBe(true);
   for (const label of ['Reports', 'Guides', 'Articles', 'All pages']) expect(nav).toContain(`<span>${label}</span>`);
   expect(css).toContain('--primary: #3fb950'); expect(css).toContain('env(safe-area-inset-bottom'); expect(css).toContain('position: fixed'); expect(css).toContain('min-height: 56px');
+  expect(css).toContain('@layer base, theme;');
+  expect(css).toContain('@import url("assets/theme.css") layer(theme);');
+  expect(css).toContain('@layer base {');
+  const theme = readFileSync(join(root, 'site/assets/theme.css'), 'utf8');
+  expect(theme).toContain('--primary: #3fb950');
+  expect(theme).toContain('@media (prefers-color-scheme: light)');
 });
 test('generator fills authored templates, not a second presentation registry', () => {
   const temp = mkdtempSync(join(tmpdir(), 'custom-section-copy.'));

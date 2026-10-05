@@ -9,10 +9,11 @@
 - Native Unify-first setup; Git-backed Docker publishing is optional.
 - Root compose.yaml and minimal config/deployment examples.
 - Agent installation runbook and one management/configuration reference.
-- Unify 0.11.5 YAML-only template source and confirmed-copy native updates; no JSON tracking manifest.
+- Unify 0.11.6 native template.source/template.keep protects configuration, palette and branding; no custom updater or JSON tracking manifest.
 - Starter settings/content under site/_examples/; fresh installs build with empty defaults.
 - Generated guides index when no authored index exists; examples remain unpublished.
-- Pinned image-baked Unify 0.11.5 and directory/Git/npm update/confirmation tests.
+- Shared base CSS and protected theme use native cascade layers without changing the default appearance.
+- Pinned image-baked Unify 0.11.6 and directory/Git/npm update/confirmation/keep tests.
 
 - MIT-only template, including the theme, authorized by the project owner.
 - One config.json for lab/report policy; optional deployment-only .env.

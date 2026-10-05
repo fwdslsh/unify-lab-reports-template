@@ -21,17 +21,19 @@ No npm publication, host services or unrelated infrastructure changes are implie
 
 1. Read AGENTS.md and check the chosen directory and hosting boundary. Do not
    overwrite an existing installation or dirty checkout. Install/check Bun 1.4+
-   and Unify 0.11.5+ on the build machine, not necessarily on the hosting server.
+   and Unify 0.11.6+ on the build machine, not necessarily on the hosting server.
 2. Run native unify init with the chosen template source in an empty project.
    Directory sources must contain only clean template files; ignored runtime
    data is not excluded automatically. Native init skips root package manifests
    and lockfiles. Use unify directly; do not add an installer wrapper.
-   Init records template: in unify.yaml; there is no JSON tracking file.
+   Init records template.source and retains template.keep in unify.yaml;
+   there is no JSON tracking file.
 3. Optionally copy site/_examples/config.json to config.json and edit your copy
    with reviewed non-secret endpoints/monitoring policy. Empty defaults need no file.
    Copy content examples into ordinary authored paths before editing. Set
    branding in site/_includes/header.html and footer links in footer.html; add
-   authored content under site/. Preview the layout/includes with unify dev.
+   palette/fonts in site/assets/theme.css, and authored content under site/.
+   Preview the layout/includes with unify dev.
    Preserve existing settings/content on later edits.
 4. Run unify build --clean --audit --strict. Verify dist/index.html and the
    generated navigation. A successful command alone is not the final check.
@@ -74,9 +76,11 @@ jobs and distinguish successful backups from tested restores.
 
 For later updates follow docs/template-updates.md: dry-run, review additions
 and overwrites, confirm, build and deploy. Actual config/content are outside
-shipped example paths and remain untouched. Shared layout/tooling edits are
-overwritten if accepted; preserve/reapply them deliberately. No reconfiguration
-or hash baseline is needed. Never automate template updates in the publisher.
+shipped example paths and remain untouched. Native template.keep protects build
+flags, theme and branding by default. Add exact paths for other customized shared
+files before updating. Unlisted shared edits are replaced only after confirmation.
+No reconfiguration or hash baseline is needed. Never automate template updates
+in the publisher.
 
 Record the site URL, source directory, static-server output mount and collection
 method. Include repo/branch/revision and Compose project only when used. List any checks

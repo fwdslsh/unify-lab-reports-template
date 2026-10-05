@@ -77,6 +77,53 @@ for (const form of ['directory', 'git']) test(`native ${form} update preserves a
   } finally { f.close(); }
 }, 60000);
 
+for (const form of ['directory', 'git']) test(`native ${form} keep preserves configuration/theme/branding while shared files update`, () => {
+  const f = fixture(form);
+  try {
+    expect(f.run(['init', f.source, '--audit']).status).toBe(0);
+    const customized = {
+      'unify.yaml': readFileSync(join(f.project, 'unify.yaml'), 'utf8') + '\npretty-urls: true\n',
+      'site/assets/theme.css': ':root { --primary: #bada55; }\n',
+      'site/_includes/header.html': readFileSync(join(f.project, 'site/_includes/header.html'), 'utf8').replace('home</a>', 'Custom lab</a>'),
+      'site/_includes/footer.html': readFileSync(join(f.project, 'site/_includes/footer.html'), 'utf8') + '\n<!-- custom footer -->\n',
+    };
+    for (const [path, content] of Object.entries(customized)) write(join(f.project, path), content);
+    f.changed();
+    const before = digest(f.project);
+    const preview = f.run(['update', '--dry-run']);
+    expect(preview.status, preview.stderr).toBe(0);
+    for (const path of Object.keys(customized)) expect(preview.stdout).toContain('keep ' + path);
+    expect(digest(f.project)).toEqual(before);
+    const update = f.run(['update', '--yes']); expect(update.status, update.stderr).toBe(0);
+    for (const [path, content] of Object.entries(customized)) expect(readFileSync(join(f.project, path), 'utf8')).toBe(content);
+    expect(readFileSync(join(f.project, 'scripts/html.mjs'), 'utf8')).toContain('Upstream shared improvement');
+    const build = f.run(['build', '--clean', '--audit', '--strict']); expect(build.status, build.stderr).toBe(0);
+    expect(readFileSync(join(f.project, 'dist/index.html'), 'utf8')).toContain('Custom lab');
+    expect(readFileSync(join(f.project, 'dist/assets/theme.css'), 'utf8')).toBe(customized['site/assets/theme.css']);
+    const repeat = f.run(['update']); expect(repeat.status, repeat.stderr).toBe(0);
+    expect(repeat.stdout).toContain('nothing to do');
+  } finally { f.close(); }
+}, 60000);
+
+test('missing kept files are added and command-line keep replaces the YAML list for one run', () => {
+  const f = fixture();
+  try {
+    expect(f.run(['init', f.source]).status).toBe(0);
+    const theme = join(f.project, 'site/assets/theme.css');
+    rmSync(theme);
+    const restored = f.run(['update', '--yes']); expect(restored.status, restored.stderr).toBe(0);
+    expect(readFileSync(theme, 'utf8')).toBe(readFileSync(join(f.template, 'site/assets/theme.css'), 'utf8'));
+    write(theme, ':root { --primary: #bada55; }\n');
+    const file = join(f.project, 'scripts/html.mjs');
+    const custom = readFileSync(file, 'utf8') + '\n// Local customization\n'; write(file, custom);
+    const override = f.run(['update', '--yes', '--keep', 'scripts/html.mjs']);
+    expect(override.status, override.stderr).toBe(0);
+    expect(readFileSync(file, 'utf8')).toBe(custom);
+    expect(readFileSync(theme, 'utf8')).toBe(readFileSync(join(f.template, 'site/assets/theme.css'), 'utf8'));
+    expect(readFileSync(join(f.project, 'unify.yaml'), 'utf8')).toContain('- site/assets/theme.css');
+  } finally { f.close(); }
+});
+
 test('shared local edits are preserved on decline and replaced only after explicit acceptance', () => {
   const f = fixture();
   try {

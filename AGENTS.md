@@ -1,6 +1,6 @@
 # Lab reports template
 
-Use native Unify 0.11.5+ init, dev, build and update. A site repository,
+Use native Unify 0.11.6+ init, dev, build and update. A site repository,
 Docker and automatic publishing are optional. Follow docs/agent-install.md,
 DEPLOY.md and docs/template-updates.md; do not add an installer/updater wrapper.
 
@@ -14,9 +14,11 @@ copy examples to config.json or their authored site paths. With no config.json,
 safe empty defaults apply; an explicitly selected missing config is an error.
 Configuration is collection/monitoring policy, not presentation.
 
-Native init records template: in unify.yaml. No JSON ownership/hash manifest.
-Update copies every shipped path after confirmation. Preview first; decline
-if shared-file customizations need preserving. Actual config/content outside
+Native init records template.source and retains template.keep in unify.yaml.
+No JSON ownership/hash manifest. Existing kept files are never overwritten;
+missing kept files are added. Default protected paths are unify.yaml, theme.css,
+header and footer. Add exact paths for other shared-file customizations.
+Unlisted shared changes require confirmation. Actual config/content outside
 shipped paths are untouched. Never silently accept overwrites or rerun init over
 operator data. See docs/template-updates.md for the exact contract.
 

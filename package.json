@@ -46,7 +46,7 @@
     "retain:health": "bun scripts/retain-health.mjs"
   },
   "devDependencies": {
-    "@fwdslsh/unify": "^0.11.5"
+    "@fwdslsh/unify": "^0.11.6"
   },
   "publishConfig": {
     "access": "public"

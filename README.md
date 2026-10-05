@@ -6,10 +6,10 @@ service or separate monitoring stack.
 
 ## Install with Unify
 
-Install Bun 1.4+ and Unify 0.11.5+, then initialize an empty project:
+Install Bun 1.4+ and Unify 0.11.6+, then initialize an empty project:
 
 ```sh
-bun add --global @fwdslsh/unify@^0.11.5
+bun add --global @fwdslsh/unify@^0.11.6
 mkdir my-lab-reports
 cd my-lab-reports
 unify init https://github.com/fwdslsh/unify-lab-reports-template.git --audit
@@ -23,7 +23,8 @@ Directory sources must be clean: Unify copies regular files, including ignored
 runtime data if present. The npm package will provide another source once
 published; it is not published yet.
 
-Edit the branding in `site/_includes/header.html`, then write Markdown/HTML under `site/`.
+Edit the branding in `site/_includes/header.html` and the palette/fonts in
+`site/assets/theme.css`, then write Markdown/HTML under `site/`.
 Preview with `unify dev`. Publish by building and serving **only dist/** with
 any static web server:
 
@@ -75,11 +76,11 @@ unify update
 unify build --clean --audit --strict
 ```
 
-Unify records the source as template: in unify.yaml. There is no JSON tracking
-file. Updates list additions/overwrites and require confirmation. Your actual
-config.json and authored reports are not shipped by the template, so stay
-untouched. Shared-file edits (including layout/styles) need review: accepting
-an overwrite replaces them. See [Template updates](docs/template-updates.md).
+Unify records template.source in unify.yaml and preserves its template.keep
+list. Build flags, theme, header and footer are protected by default. Your actual
+config.json and authored reports are not shipped, so stay untouched. Add exact
+paths to keep other shared-file customizations. Unprotected changes require
+confirmation; accepting replaces them. See [Template updates](docs/template-updates.md).
 
 ## Optional: dashboard observations
 

@@ -30,6 +30,7 @@ test('real npm payload excludes private state and builds with only shipped files
     const names = packed.files.map(file => file.path);
     for (const required of ['.env.example', '.gitignore', 'bun.lock', 'site/_examples/config.json', 'site/_examples/articles/article.md', 'site/_examples/docs/index.md', 'compose.yaml', 'docs/agent-install.md', 'site/_includes/dashboard.fragment.html', 'site/_includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
+    expect(names).toContain('site/assets/theme.css');
     expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);
     const extracted = join(temp, 'extracted');
@@ -79,6 +80,12 @@ test('native npm init and versioned updates use real tarballs without publishing
     writeFileSync(join(project, 'config.json'), '{"reports":{"weeklyKeep":3}}');
     writeFileSync(join(project, 'site/index.html'), '<!doctype html><html><head><title>Custom home</title><meta name="description" content="My lab"></head><body><div slot="brand">Npm custom lab</div><h1>My dashboard</h1></body></html>');
     const beforeUpdate = readFileSync(join(project, 'config.json'), 'utf8');
+    const themeFile = join(project, 'site/assets/theme.css');
+    const customTheme = readFileSync(themeFile, 'utf8') + '\n:root { --primary: #bada55; }\n';
+    writeFileSync(themeFile, customTheme);
+    const headerFile = join(project, 'site/_includes/header.html');
+    const customHeader = readFileSync(headerFile, 'utf8').replace('home</a>', 'My npm lab</a>');
+    writeFileSync(headerFile, customHeader);
     const update = Bun.spawn(['bun', cli, 'update'], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
     expect(await update.exited, await new Response(update.stderr).text()).toBe(0);
     expect(await new Response(update.stdout).text()).toContain('nothing to do');
@@ -96,6 +103,9 @@ test('native npm init and versioned updates use real tarballs without publishing
     expect(readFileSync(join(project, 'config.json'), 'utf8')).toBe(beforeUpdate);
     expect(readFileSync(join(project, 'scripts/html.mjs'), 'utf8')).toContain('npm template improvement');
     expect(readFileSync(join(project, 'unify.yaml'), 'utf8')).toContain(`${next.name}@${next.version}`);
+    expect(readFileSync(join(project, 'unify.yaml'), 'utf8')).toContain('- site/assets/theme.css');
+    expect(readFileSync(themeFile, 'utf8')).toBe(customTheme);
+    expect(readFileSync(headerFile, 'utf8')).toBe(customHeader);
     run('bun', [cli, 'build', '--clean', '--audit', '--strict'], project);
     expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Npm custom lab');
   } finally { registry?.stop(true); rmSync(temp, { recursive: true, force: true }); }

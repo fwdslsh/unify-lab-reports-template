@@ -26,12 +26,15 @@ authorization; there is no forge-to-forge publishing integration.
 
 The package name is @fwdslsh/unify-lab-reports-template. Its own files/theme are
 MIT; dependencies retain their own licenses. See template-updates.md for site
-native Unify 0.11.5 updates. Ship configurable starters only under
-site/_examples/, not at real config/content paths. Keep native template: in an
-installed site's unify.yaml; do not ship a JSON manifest or add ownership logic.
-Test dry-run, confirmation/decline, no-op and directory/Git/npm sources. Verify
+native Unify 0.11.6 updates. Ship configurable starters only under
+site/_examples/, not at real config/content paths. Ship template.keep without
+source; native init fills template.source and retains keep in an installed site's
+unify.yaml. Do not ship a JSON manifest or add ownership logic. Protect the
+operator's build flags, theme and branding; shared base CSS remains updateable.
+Test dry-run, confirmation/decline, no-op, keep and directory/Git/npm sources. Verify
 actual config, content and private state remain byte-identical when shared tools
-change, and that shared-file edits are overwritten only with confirmation.
+change, kept files survive, missing kept files are added and unlisted shared-file
+edits are overwritten only with confirmation.
 Do not add a wrapper or automatic runtime update.
 Template packaging/init/update tests live under .github/tests/; tests/ contains
 only shared site tests. A private site's test command must not require the

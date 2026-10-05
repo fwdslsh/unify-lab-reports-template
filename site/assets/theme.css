@@ -1,0 +1,43 @@
+/* Your palette and fonts. Native template updates keep this file.
+   Remove a property to use the shared stylesheet's default. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #0a0e0a;
+  --card: #161b22;
+  --border: #30363d;
+  --line: var(--border);
+  --text: #e6edf3;
+  --dim: #8b949e;
+  --primary: #3fb950;
+  --bright: #00ff41;
+  --warn: #d29922;
+  --bad: #f85149;
+  --ok: var(--primary);
+  --crit: var(--bad);
+  --ok-soft: rgba(63, 185, 80, 0.14);
+  --warn-soft: rgba(210, 153, 34, 0.14);
+  --crit-soft: rgba(248, 81, 73, 0.14);
+  --info-soft: rgba(63, 185, 80, 0.1);
+  --code-bg: var(--card);
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f8fa;
+    --card: #ffffff;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --dim: #57606a;
+    --primary: #238636;
+    --bright: #1a7f37;
+    --warn: #9a6700;
+    --bad: #cf222e;
+    --ok-soft: rgba(35, 134, 54, 0.1);
+    --warn-soft: rgba(154, 103, 0, 0.1);
+    --crit-soft: rgba(207, 34, 46, 0.1);
+    --info-soft: rgba(35, 134, 54, 0.08);
+  }
+}
