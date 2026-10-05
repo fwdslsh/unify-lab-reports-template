@@ -27,6 +27,7 @@
     "docs/",
     "tests/*.mjs",
     "unify.yaml",
+    "unify.template.json",
     "config.json",
     ".env.example",
     ".gitignore",
@@ -48,7 +49,7 @@
     "retain:health": "bun scripts/retain-health.mjs"
   },
   "devDependencies": {
-    "@fwdslsh/unify": "^0.11.0"
+    "@fwdslsh/unify": "^0.11.2"
   },
   "publishConfig": {
     "access": "public"

@@ -6,8 +6,8 @@
 - Native Unify-first setup; Git-backed Docker publishing is optional.
 - Root compose.yaml and minimal config/deployment examples.
 - Agent installation runbook and one management/configuration reference.
-- Unify 0.11 native custom-template initialization; pinned image-baked build tool.
-- Documented site-owned customizations and native update limitation.
+- Unify 0.11.2 native init/update/adoption with a site-owned seed manifest.
+- Pinned image-baked Unify 0.11.2 and configuration/content-preserving update tests.
 
 - MIT-only template, including the theme, authorized by the project owner.
 - One config.json for site identity and lab/report policy; optional deployment-only .env.

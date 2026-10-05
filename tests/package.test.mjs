@@ -28,7 +28,7 @@ test('real npm payload excludes private state and builds with only shipped files
     }
     const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author));
     const names = packed.files.map(file => file.path);
-    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'compose.yaml', 'docs/agent-install.md', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
+    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'unify.template.json', 'compose.yaml', 'docs/agent-install.md', 'site/index.html', 'includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
     expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);
@@ -36,6 +36,7 @@ test('real npm payload excludes private state and builds with only shipped files
     mkdirSync(extracted);
     run('tar', ['-xzf', join(temp, packed.filename), '-C', extracted], author);
     const project = join(extracted, 'package');
+    expect(Object.keys(JSON.parse(readFileSync(join(project, 'unify.template.json'), 'utf8')))).toEqual(['owned']);
     run('bun', ['install', '--frozen-lockfile', '--ignore-scripts'], project);
     run('bun', ['run', 'build'], project);
     const home = readFileSync(join(project, 'dist/index.html'), 'utf8');
@@ -54,24 +55,51 @@ test('real npm payload excludes private state and builds with only shipped files
   } finally { rmSync(temp, { recursive: true, force: true }); }
 }, 60000);
 
-test('native npm template source initializes the real tarball without publishing to a registry', async () => {
+test('native npm init and versioned updates use real tarballs without publishing to a registry', async () => {
   const temp = mkdtempSync(join(tmpdir(), 'lab-template-npm-init.'));
   let registry;
   try {
     const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], root));
+    const packages = [packed];
     const spec = packed.name + '@' + packed.version;
     registry = Bun.serve({ hostname: '127.0.0.1', port: 0, fetch(request) {
-      if (new URL(request.url).pathname === '/template.tgz') return new Response(Bun.file(join(temp, packed.filename)));
-      return Response.json({ name: packed.name, 'dist-tags': { latest: packed.version }, versions: { [packed.version]: { name: packed.name, version: packed.version, dist: { tarball: `http://127.0.0.1:${registry.port}/template.tgz` } } } });
+      const tarball = packages.find(pkg => new URL(request.url).pathname === '/' + pkg.filename);
+      if (tarball) return new Response(Bun.file(join(temp, tarball.filename)));
+      return Response.json({ name: packed.name, 'dist-tags': { latest: packages.at(-1).version }, versions: Object.fromEntries(packages.map(pkg => [pkg.version, { name: pkg.name, version: pkg.version, dist: { tarball: `http://127.0.0.1:${registry.port}/${pkg.filename}` } }])) });
     } });
     const project = join(temp, 'project'); mkdirSync(project);
     const cli = join(root, 'node_modules/@fwdslsh/unify/src/cli.js');
     const child = Bun.spawn(['bun', cli, 'init', spec], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
     expect(await child.exited, await new Response(child.stderr).text()).toBe(0);
+    const record = JSON.parse(readFileSync(join(project, 'unify.template.json'), 'utf8'));
+    expect(record.schemaVersion).toBe(1);
+    expect(record.owned).toContain('config.json');
+    expect(record.source).toBe(spec);
     expect(readFileSync(join(project, 'compose.yaml'), 'utf8')).toContain('${STATE_PATH:-./state}');
     expect(readFileSync(join(project, 'docs/agent-install.md'), 'utf8')).toContain('Docker');
     const build = run('bun', [cli, 'build', '--clean', '--audit', '--strict'], project);
     expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Not collected');
+    writeFileSync(join(project, 'config.json'), '{"site":{"brand":"Npm custom lab"}}');
+    const beforeUpdate = readFileSync(join(project, 'config.json'), 'utf8');
+    const update = Bun.spawn(['bun', cli, 'update'], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await update.exited, await new Response(update.stderr).text()).toBe(0);
+    expect(await new Response(update.stdout).text()).toContain('nothing to do');
+    expect(readFileSync(join(project, 'config.json'), 'utf8')).toBe(beforeUpdate);
+    const author = join(temp, 'next-author');
+    const excluded = new Set(['node_modules', '.git', 'dist', 'state', 'published', 'ssh', '__pycache__']);
+    cpSync(root, author, { recursive: true, filter: path => !path.slice(root.length).split('/').some(p => excluded.has(p) || p === '.env' || p.endsWith('.tgz')) });
+    const pkg = JSON.parse(readFileSync(join(author, 'package.json'), 'utf8'));
+    pkg.version = '9.9.9-update-fixture.1'; writeFileSync(join(author, 'package.json'), JSON.stringify(pkg));
+    writeFileSync(join(author, 'config.json'), '{"site":{"brand":"New default"}}');
+    writeFileSync(join(author, 'scripts/html.mjs'), readFileSync(join(author, 'scripts/html.mjs'), 'utf8') + '\n// npm template improvement\n');
+    const [next] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author)); packages.push(next);
+    const upgraded = Bun.spawn(['bun', cli, 'update', `${next.name}@${next.version}`], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await upgraded.exited, await new Response(upgraded.stderr).text()).toBe(0);
+    expect(readFileSync(join(project, 'config.json'), 'utf8')).toBe(beforeUpdate);
+    expect(readFileSync(join(project, 'scripts/html.mjs'), 'utf8')).toContain('npm template improvement');
+    expect(JSON.parse(readFileSync(join(project, 'unify.template.json'), 'utf8')).revision).toBe(next.version);
+    run('bun', [cli, 'build', '--clean', '--audit', '--strict'], project);
+    expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Npm custom lab');
   } finally { registry?.stop(true); rmSync(temp, { recursive: true, force: true }); }
 }, 60000);
 

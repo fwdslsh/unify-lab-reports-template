@@ -56,7 +56,7 @@ docker compose ps
 docker compose logs --tail 40 builder
 ```
 
-The image contains pinned Unify 0.11.0. The builder does not install dependencies
+The image contains pinned Unify 0.11.2. The builder does not install dependencies
 at startup or on each publication. An initial build needs network access during
 image construction; content builds need only Git access.
 
@@ -135,7 +135,7 @@ sites use edit → unify build → deploy dist/; no commit or push is required.
 | --- | --- |
 | Content or config change | Commit and push; automatic publication |
 | Deployment setting change | `docker compose up -d --force-recreate builder` |
-| Template/tooling change | Review/apply update, `git pull --ff-only`, then `docker compose up -d --build builder` |
+| Template/tooling change | Preview/apply `unify update` on the build machine; test, commit/push, then pull the site and rebuild builder |
 | Recent logs | `docker compose logs --tail 40 builder` |
 | Pause publishing | `docker compose stop builder`; last site stays served |
 | Resume | `docker compose start builder` |

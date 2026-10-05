@@ -5,12 +5,12 @@
     "": {
       "name": "@fwdslsh/unify-lab-reports-template",
       "devDependencies": {
-        "@fwdslsh/unify": "^0.11.0",
+        "@fwdslsh/unify": "^0.11.2",
       },
     },
   },
   "packages": {
-    "@fwdslsh/unify": ["@fwdslsh/unify@0.11.0", "", { "dependencies": { "js-yaml": "^5.3.0", "markdown-it": "^14.3.0" }, "peerDependencies": { "bun": ">=1.2.0" }, "optionalPeers": ["bun"], "bin": { "unify": "src/cli.js" } }, "sha512-vYHI52Ds5nfv1vXq+7zppuZmJK4XomIBetDneQidzulu2DgTgx8sQOnHPH3LTPY/8s4dd4qGk9o2Rs3WX9nB6w=="],
+    "@fwdslsh/unify": ["@fwdslsh/unify@0.11.2", "", { "dependencies": { "js-yaml": "^5.3.0", "markdown-it": "^14.3.0" }, "peerDependencies": { "bun": ">=1.2.0" }, "optionalPeers": ["bun"], "bin": { "unify": "src/cli.js" } }, "sha512-P5O0LyX199eIIa9Vv2op4O9J9PueElnhhFClm7I943JjP5HYBuJ2COsehFBLeQAUd6yh/cnk53Bb5EtB8x1lvw=="],
 
     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 

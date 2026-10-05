@@ -26,7 +26,12 @@ authorization; there is no forge-to-forge publishing integration.
 
 The package name is @fwdslsh/unify-lab-reports-template. Its own files/theme are
 MIT; dependencies retain their own licenses. See template-updates.md for site
-ownership and the upstream update feature still required.
+ownership and native Unify 0.11.2 updates. Ship the author's unify.template.json
+owned manifest in the npm payload, never an installed site's generated record.
+Test update/adoption, dry-run/no-op behavior and local-edit conflicts alongside
+native directory/Git/npm initialization. Config, content and private state must
+remain byte-identical when shared tools change. The native updater owns all
+record writes; do not add a wrapper, forced merge or automated runtime update.
 
 ## GitHub mirror and npm release
 

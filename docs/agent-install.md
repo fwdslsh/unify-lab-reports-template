@@ -21,11 +21,12 @@ No npm publication, host services or unrelated infrastructure changes are implie
 
 1. Read AGENTS.md and check the chosen directory and hosting boundary. Do not
    overwrite an existing installation or dirty checkout. Install/check Bun 1.4+
-   and Unify 0.11+ on the build machine, not necessarily on the hosting server.
+   and Unify 0.11.2+ on the build machine, not necessarily on the hosting server.
 2. Run native unify init with the chosen template source in an empty project.
    Directory sources must contain only clean template files; ignored runtime
    data is not excluded automatically. Native init skips root package manifests
    and lockfiles. Use unify directly; do not add an installer wrapper.
+   Preserve the generated unify.template.json baseline with the site's sources.
 3. Edit config.json with reviewed non-secret lab identity/endpoints and add
    authored content under site/. Preserve existing settings/content on later edits.
 4. Run unify build --clean --audit --strict. Verify dist/index.html and the
@@ -66,6 +67,12 @@ machines outside their approved schedule. Add backup evidence only for existing
 jobs and distinguish successful backups from tested restores.
 
 ## Handoff
+
+For later template updates follow docs/template-updates.md: preview, review
+conflicts/removals, update, build and deploy. A pre-0.11.2 site needs one-time
+adoption of its actual earlier template version, not a guessed baseline. No
+reconfiguration is needed. Never schedule automatic template updates in the
+publisher; it builds operator-reviewed site revisions only.
 
 Record the site URL, source directory, static-server output mount and collection
 method. Include repo/branch/revision and Compose project only when used. List any checks

@@ -6,10 +6,10 @@ service or separate monitoring stack.
 
 ## Install with Unify
 
-Install Bun 1.4+ and Unify 0.11+, then initialize an empty project:
+Install Bun 1.4+ and Unify 0.11.2+, then initialize an empty project:
 
 ```sh
-bun add --global @fwdslsh/unify@^0.11.0
+bun add --global @fwdslsh/unify@^0.11.2
 mkdir my-lab-reports
 cd my-lab-reports
 unify init https://github.com/fwdslsh/unify-lab-reports-template.git
@@ -51,6 +51,25 @@ Defaults keep two weekly reviews, no spot reports, and conservative alert
 thresholds. Only add optional settings when you need to change them. Examples
 and defaults are in [Configuration](docs/configuration.md).
 
+## Update the template
+
+From your site's directory:
+
+```sh
+unify update --dry-run
+unify update
+unify build --clean --audit --strict
+```
+
+Unify remembers the template source. Existing configuration and authored content
+stay yours; unchanged shared tools update. Locally edited shared files are kept
+and reported as conflicts, not overwritten. Keep `unify.template.json` with your
+source/backup; it is Unify's update baseline, not another lab configuration file.
+
+Sites created before 0.11.2 need a one-time adoption of their previous template
+version. See [Template updates](docs/template-updates.md) for adoption, conflicts,
+version selection and the optional Docker image rebuild.
+
 ## Optional: dashboard observations
 
 Add endpoints to `config.json`, then collect explicitly and rebuild:
@@ -78,9 +97,8 @@ material. All pages provides search. The brand opens the dashboard; the homepage
 has no search. On phones navigation is a bottom bar.
 
 [DEPLOY.md](DEPLOY.md#manage) covers logs, image updates, rollback and backup.
-[Template updates](docs/template-updates.md) explains ownership and the current
-Unify update limitation. Never rerun init over an existing site expecting a
-safe update; it currently refuses existing files.
+[Template updates](docs/template-updates.md) explains native updates and ownership.
+Use update for an existing site; init still refuses existing files.
 
 ## Author and manage content
 

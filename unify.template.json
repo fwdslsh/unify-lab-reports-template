@@ -1,0 +1,17 @@
+{
+  "owned": [
+    "config.json",
+    "unify.yaml",
+    "compose.yaml",
+    "site/index.html",
+    "site/articles/**",
+    "site/incidents/**",
+    "site/health/**",
+    "site/docs/**",
+    "site/assets/custom.css",
+    ".env",
+    "ssh/**",
+    "state/**",
+    "published/**"
+  ]
+}

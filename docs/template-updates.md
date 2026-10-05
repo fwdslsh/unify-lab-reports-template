@@ -4,46 +4,85 @@ Settings and content are site-owned. A template update must never reset them.
 The template is a normal Unify project; there is no template-specific installer
 or updater hidden here.
 
+## Update an installed site
+
+Use Unify 0.11.2 or later from the site's directory:
+
+```sh
+unify update --dry-run
+unify update
+unify build --clean --audit --strict
+```
+
+The first command previews without writing anything. Review changes, especially
+removals, before applying. The second uses the recorded directory, Git or npm
+source. Existing site-owned files stay untouched, unchanged shared files update,
+and repeating the same update is a no-op. It never runs template hooks or builds.
+Deploy the verified output as usual. No site Git repository is required.
+
+Keep the generated unify.template.json in your backups or version control: it
+records the source/revision and file hashes. Do not edit it or copy the template
+author's owned-only manifest over it. It is not a second lab configuration file.
+
 ## Ownership
 
 | Keep local | Update from template after review |
 | --- | --- |
-| config.json, .env and SSH credentials | scripts/ and tests/ |
-| authored reports, guides and assets | deploy/ and default compose.yaml |
+| config.json, unify.yaml, compose.yaml | scripts/ and tests/ |
+| authored articles, incidents, reviews and guides | deploy/ and setup documentation |
 | observation state and published output | shared includes/layout/navigation |
 | site-specific package identity/build flags | setup/reference documentation |
 | intentional CSS/layout/Compose customizations | unmodified base theme/tooling |
 
-The homepage and sample article are starter content, not mandatory replacements.
-Sites may supply their own dashboard and observed-inventory pages. Preserve
-them. Docker Compose overrides and site/assets/custom.css are ordinary options
-for local deployment/theme additions; no additional override file is required.
+The template's native owned manifest protects config/build/deployment seeds,
+the homepage, authored content directories and custom.css. Existing .env, SSH
+files, state and output are also declared site-owned and are never distributed.
+Your other added files are not template inputs and are left alone. Shared files
+you edit, such as CSS/layout or collectors, are protected by conflict detection.
+Review new default configuration/Compose suggestions manually; ownership means
+an update does not replace your settings, even when the seed was unmodified.
 
-## Current Unify boundary
+The homepage and sample article are starter content. Existing files remain yours;
+missing owned seeds can be added by an update. Review the dry run if you removed
+a starter page or have your own dashboard. Docker Compose overrides and
+site/assets/custom.css are ordinary options for deployment/theme additions; no
+additional override file is required.
 
-Unify 0.11 supports installing directory/Git/npm templates into an empty site.
-It refuses existing files and has no update command. Running init again does
-not update this template, and deleting settings to make it succeed is wrong.
+## Conflicts and failures
 
-Native updates are requested in [Unify issue #109](https://github.com/fwdslsh/unify/issues/109).
+If both you and the template changed a shared file, Unify keeps your bytes,
+reports the conflict and exits 1. Other non-conflicting changes may still apply;
+an update is not an all-or-nothing merge. Resolve each conflict deliberately and
+re-run. There is no force flag. Taking the incoming bytes clears that conflict;
+keeping different local bytes can leave it reported on future runs.
 
-Until native updates exist, back up the site and compare/apply selected template
-changes manually. Git diff/review is helpful when used, but a site repository is
-not required. Preserve site-owned files and build/test before publishing. Only
-Git-backed publishers need a commit/push and an image rebuild when tooling changes.
-No reconfiguration is needed.
+Failed fetches leave the project unchanged. Symlinks/path escapes are rejected,
+not followed. Never erase config, content or private data to make an update work.
 
-Do not use a blanket copy, rsync --delete, forced checkout or undocumented init
-flag. Modified shared files require an explicit merge, not silent replacement.
+## Existing sites created before 0.11.2
 
-## Required native update behavior
+Adopt the exact template revision/version the site previously used. This writes
+only the native record, not source/configuration/content:
 
-The desired upstream operation is one command remembering the template source
-and adopted revision. It should preserve site-owned seed files, update unchanged
-template files, preview conflicts for locally customized shared files, refuse
-unsafe paths and leave a recoverable change set. Repeating the same update
-should be a no-op. It must never touch ignored .env/SSH/state/output.
+```sh
+unify update --adopt 'https://github.com/fwdslsh/unify-lab-reports-template.git#PREVIOUS_COMMIT'
+unify update https://github.com/fwdslsh/unify-lab-reports-template.git --dry-run
+unify update https://github.com/fwdslsh/unify-lab-reports-template.git
+```
 
-No speculative manifest/schema is shipped here. Adopt Unify's actual update
-contract when released and test config/content/secret preservation before
-advertising a native update command.
+Replace PREVIOUS_COMMIT with the actual adopted commit, not today's version.
+If unknown, inspect your site history or backup before adopting; do not invent
+a baseline. The explicit update source moves off that pinned old revision; later
+unify update calls remember the new source. Named #refs or npm @versions can
+select an exact update target. Re-init is not an update and still refuses collisions.
+
+## Optional Git-backed Docker publisher
+
+Update and test on the build machine, commit/push the site including its native
+record, then pull the reviewed revision on the Docker host and rebuild builder
+when baked tooling changes: docker compose up -d --build builder. The server
+does not need host Unify/Bun. It publishes your reviewed site, not template
+changes directly. Config, private .env/SSH and dedicated state stay in place.
+No automatic template-update job, new service or reconfiguration is needed.
+
+See [Unify's native update reference](https://github.com/fwdslsh/unify/blob/v0.11.2/docs/cli-reference.md#unify-update-template).
