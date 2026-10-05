@@ -61,7 +61,8 @@ test('generator fills authored templates, not a second presentation registry', (
 });
 function project() {
   const path = mkdtempSync(join(tmpdir(), 'unify-project.'));
-  for (const name of ['scripts', 'config.json', 'unify.yaml', 'package.json', 'bun.lock']) cpSync(join(root, name), join(path, name), { recursive: true });
+  for (const name of ['scripts', 'unify.yaml', 'package.json', 'bun.lock']) cpSync(join(root, name), join(path, name), { recursive: true });
+  writeFileSync(join(path, 'config.json'), '{}');
   mkdirSync(join(path, 'site'));
   for (const name of ['_layout.html', '_includes', 'styles.css', 'assets']) cpSync(join(root, 'site', name), join(path, 'site', name), { recursive: true });
   const env = fixtureEnvironment();

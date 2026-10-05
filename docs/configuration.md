@@ -1,6 +1,8 @@
 # Configuration
 
-Edit **config.json**, then rebuild with `unify build`. Only the optional Git
+Configuration is optional: missing config.json uses safe empty defaults.
+To configure observations, copy site/_examples/config.json to config.json,
+edit your copy, then rebuild with `unify build`. Only the optional Git
 publisher needs changes committed and pushed. No template update should replace
 this file. Defaults apply to settings you omit. Credentials belong in private files,
 not in config.json or site content.
@@ -22,9 +24,9 @@ may be empty; without observations the dashboard says “Not collected.”
 
 ## Add hosts or backups
 
-- [Host collection](../site/docs/runbooks/collection.md): SSH targets, optional
+- [Host collection](../site/_examples/docs/runbooks/collection.md): SSH targets, optional
   machines and observation windows.
-- [Backup monitoring](../site/docs/services/backups.md): existing job evidence,
+- [Backup monitoring](../site/_examples/docs/services/backups.md): existing job evidence,
   coverage expectations and exclusions. This does not install backup jobs.
 
 Those examples extend config.json; merge the relevant keys, do not replace your
@@ -42,17 +44,17 @@ whole configuration. Native remote probes need no Python or Node.
 | Section headings, introductions and empty states | site/_includes/*.fragment.html |
 
 Keep a title and `<meta name="description" content="…">` in each section head.
-The generator reads those seven heads to label its own navigation entries; it
+The generator reads those eight heads to label its own navigation entries; it
 does not crawl source files or compose HTML. Unify handles includes, head merging
 and slot fills. Section bodies use a bare slot with a useful preview fallback;
 the generator fills it with actual lists or observations only during builds.
 There are no generated includes needed by the layout.
 
-Run `unify dev` and open `/_unify/preview/_layout.html` or
+Run `unify dev` and start at `/_unify/preview/`, or open `/_unify/preview/_layout.html` or
 `/_unify/preview/_includes/nav.html` to preview authored source.
 Open `/_unify/preview/_includes/dashboard.fragment.html` for the empty
 dashboard template. To preview the layout with an authored page, open
-`/_unify/preview/_layout.html?page=articles/welcome.md`. No build is required first.
+`/_unify/preview/_layout.html?page=_examples/articles/article.md`. No build is required first. Use ?chrome=off to hide Unify's preview controls.
 
 The layout's named `brand` and `footer` slots have authored defaults. An HTML
 page can supply `<div slot="brand">…</div>` or `<p slot="footer">…</p>` in its

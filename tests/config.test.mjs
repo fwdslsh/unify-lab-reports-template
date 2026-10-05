@@ -10,6 +10,7 @@ test('one config supplies only operational defaults and report policy', () => {
   expect(loadConfig().hosts).toEqual([]); expect(config.backups.jobs).toEqual([]);
 });
 const invalid = [
+  // Presentation belongs in authored HTML, not monitoring configuration.
   { hostz: [] }, { site: { brnad: 'bad' } }, { site: { filesUrl: 'javascript:alert(1)' } }, { site: { title: 1 } },
   { reports: { prefix: '../bad' } }, { reports: { weeklyKeep: 0 } }, { reports: { weeklyKeep: '2' } }, { reports: { timezone: 'Never/Happened' } },
   { thresholds: { criticalPercent: 50 } }, { thresholds: { diskWarningPercent: 'never' } }, { thresholds: { memoryWarnngPercent: 80 } },
@@ -19,6 +20,9 @@ const invalid = [
   { hosts: [{ id: 'x', window: { timezone: 'UTC', start: '25:00', end: '08:00' } }] },
   { backups: { jobs: [{ id: 'x', unit: 'bad;touch /tmp/no', host: 'x' }] } }, { exclusions: { containers: { '*': '' } } }
 ];
+test('an explicit missing configuration never silently uses defaults', () => {
+  expect(() => loadConfig('/nonexistent/reports-config.json')).toThrow();
+});
 for (const [i, config] of invalid.entries()) test(`invalid config ${i + 1} fails instead of silently dropping intent`, () => expect(() => validateConfig(config)).toThrow());
 test('fingerprints use input files, never unrelated secrets or branding environment', () => {
   const temp = mkdtempSync(join(tmpdir(), 'config-hash.'));

@@ -113,3 +113,17 @@ test('one config file changes publication; unrelated environment does not', () =
     assert.equal(f.publicFile(), 'same source');
   } finally { f.close(); }
 });
+
+test('publisher supports missing optional config and clears a removed revision config', () => {
+  const f = fixture();
+  try {
+    writeFileSync(join(f.repo, 'config.json'), '{"reports":{"weeklyKeep":3}}');
+    f.commit('configured'); assert.equal(f.run().status, 0);
+    assert.equal(readFileSync(join(f.env.STATE_DIR, 'config.json'), 'utf8'), '{"reports":{"weeklyKeep":3}}');
+    rmSync(join(f.repo, 'config.json'));
+    f.commit('default configuration'); assert.equal(f.run().status, 0);
+    assert.deepEqual(JSON.parse(readFileSync(join(f.env.STATE_DIR, 'config.json'), 'utf8')), {});
+    assert.equal(f.publicFile(), 'default configuration');
+    assert.equal(f.run().stdout, '');
+  } finally { f.close(); }
+});

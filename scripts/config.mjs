@@ -80,7 +80,14 @@ export function validateConfig(input) {
   }
   return { reports, hosts, endpoints, thresholds, backups, exclusions };
 }
-export function loadConfig(path = runtimePath('CONFIG_FILE', 'config.json')) { return validateConfig(JSON.parse(readFileSync(path, 'utf8'))); }
+export function loadConfig(path) {
+  const env = environment();
+  const selected = path ?? runtimePath('CONFIG_FILE', 'config.json', env);
+  // A fresh scaffold needs no monitoring settings. Explicit missing inputs
+  // still fail rather than silently discarding operator intent.
+  if (path === undefined && !env.CONFIG_FILE && !existsSync(selected)) return validateConfig({});
+  return validateConfig(JSON.parse(readFileSync(selected, 'utf8')));
+}
 export function readSnapshot(path = runtimePath('SNAPSHOT_FILE', 'state/observed.json')) {
   if (!existsSync(path)) return { observed_at: null, hosts: {}, endpoints: [] };
   const data = JSON.parse(readFileSync(path, 'utf8'));

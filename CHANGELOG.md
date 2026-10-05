@@ -4,13 +4,15 @@
 
 - Authored chrome and native slotted section templates in site/_includes/; previews no longer need generated includes.
 - Presentation lives in HTML, separate from collection/monitoring config.json. Existing authored dashboards remain supported.
-- Separate template-maintainer tests from reusable site tests; preserve site README/changelog on native updates.
+- Separate template-maintainer tests from reusable site tests.
 - Public GitHub mirror and GitHub-only, tag-gated npm trusted-publishing workflow.
 - Native Unify-first setup; Git-backed Docker publishing is optional.
 - Root compose.yaml and minimal config/deployment examples.
 - Agent installation runbook and one management/configuration reference.
-- Unify 0.11.2 native init/update/adoption with a site-owned seed manifest.
-- Pinned image-baked Unify 0.11.2 and configuration/content-preserving update tests.
+- Unify 0.11.5 YAML-only template source and confirmed-copy native updates; no JSON tracking manifest.
+- Starter settings/content under site/_examples/; fresh installs build with empty defaults.
+- Generated guides index when no authored index exists; examples remain unpublished.
+- Pinned image-baked Unify 0.11.5 and directory/Git/npm update/confirmation tests.
 
 - MIT-only template, including the theme, authorized by the project owner.
 - One config.json for lab/report policy; optional deployment-only .env.

@@ -3,7 +3,8 @@
 ## Native static hosting
 
 Initialize with `unify init` as shown in [README.md](README.md#install-with-unify).
-Edit config.json and site/, then run:
+Optionally copy site/_examples/config.json to config.json for monitoring;
+otherwise empty defaults work. Author content in site/, then run:
 
 ```sh
 unify build --clean --audit --strict
@@ -30,7 +31,7 @@ Bun installation is needed.
 ### 1. Prepare
 
 Clone the site to its chosen directory and work from that root. Edit and commit
-`config.json` and content, then push. The builder always reads the fetched revision,
+your optional `config.json` and content, then push. The builder always reads the fetched revision,
 not uncommitted settings in the server clone.
 
 Copy `.env.example` to ignored `.env` and set `REPO_URL` to YOUR site repository.
@@ -56,7 +57,7 @@ docker compose ps
 docker compose logs --tail 40 builder
 ```
 
-The image contains pinned Unify 0.11.2. The builder does not install dependencies
+The image contains pinned Unify 0.11.5. The builder does not install dependencies
 at startup or on each publication. An initial build needs network access during
 image construction; content builds need only Git access.
 

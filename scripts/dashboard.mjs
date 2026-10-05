@@ -50,7 +50,7 @@ export function backupState(job, host, now) {
   else if (['activating', 'active'].includes(status.active)) [state, label] = ['unknown', 'Running'];
   return [state, label, age, status];
 }
-export function renderDashboard(snapshot, input, previous = {}, now = new Date()) {
+export function renderDashboard(snapshot, input, previous = {}, now = new Date(), backupGuide = null) {
   const policy = validateConfig(input), thresholds = policy.thresholds;
   const alerts = [], machines = [], endpoints = [], backups = [], groups = new Map();
   const hosts = Object.fromEntries(policy.hosts.map(item => [item.id, { ...snapshot.hosts?.[item.id], role: item.role ?? '', platform: item.platform ?? 'linux', optional: item.optional ?? false }]));
@@ -139,7 +139,7 @@ export function renderDashboard(snapshot, input, previous = {}, now = new Date()
   }
   excluded.push(...Object.entries(policy.exclusions.backups));
   let coverage = gaps.length ? '<h3>Needs review</h3>' + definition(gaps) : '<p>No configured coverage gaps.</p>';
-  coverage += '<h3>Configured coverage</h3>' + definition(covered) + '<h3>Excluded</h3>' + definition(excluded) + '<p><a href="/docs/services/backups.html">Backup scope and recovery</a></p>';
+  coverage += '<h3>Configured coverage</h3>' + definition(covered) + '<h3>Excluded</h3>' + definition(excluded) + (backupGuide ? `<p><a href="${e(backupGuide)}">Backup scope and recovery</a></p>` : '');
   backups.push(indicator('Coverage', gaps.length ? 'warn' : expectations.length ? 'ok' : 'unknown', gaps.length ? `${gaps.length} gaps` : expectations.length ? 'Configured' : 'Not assessed', coverage, `${covered.length} targets configured`, 'backup-coverage'));
   if (gaps.length) alert('warn', `${gaps.length} backup coverage gaps`, 'Coverage', gaps.map(([target, note]) => target + ': ' + note).join('; '), 'backup-coverage');
   alerts.sort((a, b) => rank[a.state] - rank[b.state] || a.scope.localeCompare(b.scope) || a.title.localeCompare(b.title));
@@ -165,5 +165,5 @@ export function renderDashboard(snapshot, input, previous = {}, now = new Date()
   }).join('');
   body += section('containers', 'Containers', containerGroups, 'Running ≠ healthy');
   body += section('backups', 'Backups', '<div class="indicator-grid">' + backups.join('') + '</div>', 'Success ≠ verified restore');
-  return body + '<div class="dashboard-links"><a href="/docs/inventory/observed.html">Full inventory</a><a href="/docs/services/backups.html">Backup guide</a><a href="/docs/">Lab guide</a></div><script type="module" src="/assets/status.js"></script></div>';
+  return body + '<div class="dashboard-links"><a href="/docs/inventory/observed.html">Full inventory</a>' + (backupGuide ? `<a href="${e(backupGuide)}">Backup guide</a>` : '') + '<a href="/docs/">Lab guide</a></div><script type="module" src="/assets/status.js"></script></div>';
 }

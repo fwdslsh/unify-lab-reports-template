@@ -26,7 +26,11 @@ REVISION=$(git --git-dir="$CACHE" rev-parse refs/heads/publish)
 [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]] || { echo 'Unsupported Git revision' >&2; exit 1; }
 # Configuration belongs to the fetched source revision, not the image or host clone.
 if [ -z "${CONFIG_FILE:-}" ]; then
-  git --git-dir="$CACHE" show "$REVISION:config.json" > "$STATE_DIR/.config-next"
+  if git --git-dir="$CACHE" cat-file -e "$REVISION:config.json" 2>/dev/null; then
+    git --git-dir="$CACHE" show "$REVISION:config.json" > "$STATE_DIR/.config-next"
+  else
+    printf '{}\n' > "$STATE_DIR/.config-next"
+  fi
   mv -f "$STATE_DIR/.config-next" "$STATE_DIR/config.json"
   export CONFIG_FILE="$STATE_DIR/config.json"
 fi

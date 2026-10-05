@@ -6,13 +6,13 @@ service or separate monitoring stack.
 
 ## Install with Unify
 
-Install Bun 1.4+ and Unify 0.11.2+, then initialize an empty project:
+Install Bun 1.4+ and Unify 0.11.5+, then initialize an empty project:
 
 ```sh
-bun add --global @fwdslsh/unify@^0.11.2
+bun add --global @fwdslsh/unify@^0.11.5
 mkdir my-lab-reports
 cd my-lab-reports
-unify init https://github.com/fwdslsh/unify-lab-reports-template.git
+unify init https://github.com/fwdslsh/unify-lab-reports-template.git --audit
 unify dev
 ```
 
@@ -43,7 +43,7 @@ not that the lab is healthy.
 
 ## Configure
 
-- `config.json`: hosts, endpoints and optional monitoring policy.
+- `config.json`: optional hosts, endpoints and monitoring policy; absent means empty defaults.
 - `.env`: optional private deployment/collection settings; not needed to build.
 - `site/`: your Markdown/HTML reports, guides, layout and presentation.
 
@@ -51,6 +51,15 @@ All includes live in `site/_includes/`. Edit the header/footer and section
 templates directly; `unify dev` previews them without a generator or collected
 data. Generated lists fill their native slots during a build. An authored
 `site/index.html` or `site/index.md` can replace the generated dashboard.
+
+To configure monitoring, copy the example once and edit your copy:
+
+```sh
+cp site/_examples/config.json config.json
+```
+
+Article and guide starters also live in site/_examples/. Copy them into
+site/articles/ or site/docs/ before editing; underscore examples are not published.
 
 Defaults keep two weekly reviews, no spot reports, and conservative alert
 thresholds. Only add optional settings when you need to change them. Examples
@@ -66,14 +75,11 @@ unify update
 unify build --clean --audit --strict
 ```
 
-Unify remembers the template source. Existing configuration and authored content
-stay yours; unchanged shared tools update. Locally edited shared files are kept
-and reported as conflicts, not overwritten. Keep `unify.template.json` with your
-source/backup; it is Unify's update baseline, not another lab configuration file.
-
-Sites created before 0.11.2 need a one-time adoption of their previous template
-version. See [Template updates](docs/template-updates.md) for adoption, conflicts,
-version selection and the optional Docker image rebuild.
+Unify records the source as template: in unify.yaml. There is no JSON tracking
+file. Updates list additions/overwrites and require confirmation. Your actual
+config.json and authored reports are not shipped by the template, so stay
+untouched. Shared-file edits (including layout/styles) need review: accepting
+an overwrite replaces them. See [Template updates](docs/template-updates.md).
 
 ## Optional: dashboard observations
 
@@ -102,7 +108,7 @@ material. All pages provides search. The brand opens the dashboard; the homepage
 has no search. On phones navigation is a bottom bar.
 
 [DEPLOY.md](DEPLOY.md#manage) covers logs, image updates, rollback and backup.
-[Template updates](docs/template-updates.md) explains native updates and ownership.
+[Template updates](docs/template-updates.md) explains native updates and overwrite review.
 Use update for an existing site; init still refuses existing files.
 
 ## Author and manage content

@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { cpSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, writeFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,7 +28,7 @@ test('real npm payload excludes private state and builds with only shipped files
     }
     const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author));
     const names = packed.files.map(file => file.path);
-    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'config.json', 'unify.template.json', 'compose.yaml', 'docs/agent-install.md', 'site/_includes/dashboard.fragment.html', 'site/_includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
+    for (const required of ['.env.example', '.gitignore', 'bun.lock', 'site/_examples/config.json', 'site/_examples/articles/article.md', 'site/_examples/docs/index.md', 'compose.yaml', 'docs/agent-install.md', 'site/_includes/dashboard.fragment.html', 'site/_includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
     expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);
@@ -36,7 +36,8 @@ test('real npm payload excludes private state and builds with only shipped files
     mkdirSync(extracted);
     run('tar', ['-xzf', join(temp, packed.filename), '-C', extracted], author);
     const project = join(extracted, 'package');
-    expect(Object.keys(JSON.parse(readFileSync(join(project, 'unify.template.json'), 'utf8')))).toEqual(['owned']);
+    expect(names).not.toContain('config.json');
+    expect(names).not.toContain('unify.template.json');
     run('bun', ['install', '--frozen-lockfile', '--ignore-scripts'], project);
     run('bun', ['run', 'build'], project);
     const home = readFileSync(join(project, 'dist/index.html'), 'utf8');
@@ -69,16 +70,14 @@ test('native npm init and versioned updates use real tarballs without publishing
     const cli = join(root, 'node_modules/@fwdslsh/unify/src/cli.js');
     const child = Bun.spawn(['bun', cli, 'init', spec], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
     expect(await child.exited, await new Response(child.stderr).text()).toBe(0);
-    const record = JSON.parse(readFileSync(join(project, 'unify.template.json'), 'utf8'));
-    expect(record.schemaVersion).toBe(1);
-    expect(record.owned).toContain('config.json');
-    expect(record.source).toBe(spec);
+    expect(existsSync(join(project, 'unify.template.json'))).toBe(false);
+    expect(readFileSync(join(project, 'unify.yaml'), 'utf8')).toContain(spec);
     expect(readFileSync(join(project, 'compose.yaml'), 'utf8')).toContain('${STATE_PATH:-./state}');
     expect(readFileSync(join(project, 'docs/agent-install.md'), 'utf8')).toContain('Docker');
     const build = run('bun', [cli, 'build', '--clean', '--audit', '--strict'], project);
     expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Not collected');
     writeFileSync(join(project, 'config.json'), '{"reports":{"weeklyKeep":3}}');
-    const header = join(project, 'site/_includes/header.html'); writeFileSync(header, readFileSync(header, 'utf8').replace('home</a>', 'Npm custom lab</a>'));
+    writeFileSync(join(project, 'site/index.html'), '<!doctype html><html><head><title>Custom home</title><meta name="description" content="My lab"></head><body><div slot="brand">Npm custom lab</div><h1>My dashboard</h1></body></html>');
     const beforeUpdate = readFileSync(join(project, 'config.json'), 'utf8');
     const update = Bun.spawn(['bun', cli, 'update'], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
     expect(await update.exited, await new Response(update.stderr).text()).toBe(0);
@@ -89,14 +88,14 @@ test('native npm init and versioned updates use real tarballs without publishing
     cpSync(root, author, { recursive: true, filter: path => !path.slice(root.length).split('/').some(p => excluded.has(p) || p === '.env' || p.endsWith('.tgz')) });
     const pkg = JSON.parse(readFileSync(join(author, 'package.json'), 'utf8'));
     pkg.version = '9.9.9-update-fixture.1'; writeFileSync(join(author, 'package.json'), JSON.stringify(pkg));
-    writeFileSync(join(author, 'config.json'), '{"reports":{"weeklyKeep":4}}');
+    writeFileSync(join(author, 'site/_examples/config.json'), '{"reports":{"weeklyKeep":4}}');
     writeFileSync(join(author, 'scripts/html.mjs'), readFileSync(join(author, 'scripts/html.mjs'), 'utf8') + '\n// npm template improvement\n');
     const [next] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], author)); packages.push(next);
-    const upgraded = Bun.spawn(['bun', cli, 'update', `${next.name}@${next.version}`], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
+    const upgraded = Bun.spawn(['bun', cli, 'update', `${next.name}@${next.version}`, '--yes'], { cwd: project, env: { ...fixtureEnvironment(), npm_config_registry: `http://127.0.0.1:${registry.port}`, npm_config_cache: join(temp, 'npm-cache') }, stdout: 'pipe', stderr: 'pipe' });
     expect(await upgraded.exited, await new Response(upgraded.stderr).text()).toBe(0);
     expect(readFileSync(join(project, 'config.json'), 'utf8')).toBe(beforeUpdate);
     expect(readFileSync(join(project, 'scripts/html.mjs'), 'utf8')).toContain('npm template improvement');
-    expect(JSON.parse(readFileSync(join(project, 'unify.template.json'), 'utf8')).revision).toBe(next.version);
+    expect(readFileSync(join(project, 'unify.yaml'), 'utf8')).toContain(`${next.name}@${next.version}`);
     run('bun', [cli, 'build', '--clean', '--audit', '--strict'], project);
     expect(readFileSync(join(project, 'dist/index.html'), 'utf8')).toContain('Npm custom lab');
   } finally { registry?.stop(true); rmSync(temp, { recursive: true, force: true }); }

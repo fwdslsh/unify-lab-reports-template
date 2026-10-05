@@ -5,9 +5,9 @@ import { loadConfig, readSnapshot, runtimePath, ROOT } from './config.mjs';
 import { renderDashboard } from './dashboard.mjs';
 import { escape as e, isoDate, definition } from './html.mjs';
 
-const collections = ['articles', 'health', 'incidents'];
+const collections = ['articles', 'health', 'incidents', 'docs'];
 const generated = [['index.html', 'dashboard'], ['docs/inventory/observed.html', 'inventory'], ['reports/index.html', 'reports'], ['sitemap.html', 'sitemap'], ...collections.map(folder => [folder + '/index.html', folder])];
-// Only the seven explicit head fragments are read here. Unify still owns the
+// Only the eight explicit head fragments are read here. Unify still owns the
 // inventory of authored pages and all include/slot composition.
 function head(id, sourceRoot) {
   const html = readFileSync(join(sourceRoot, '_includes', id + '-head.html'), 'utf8');
@@ -33,7 +33,7 @@ export function readPages(inventory, sourceRoot = join(ROOT, 'site')) {
   }
   for (const [name, id] of generated) {
     if (seen.has('/' + name)) {
-      if (['index.html', 'docs/inventory/observed.html'].includes(name)) continue;
+      if (['index.html', 'docs/index.html', 'docs/inventory/observed.html'].includes(name)) continue;
       throw new Error('Generated navigation collides with source: ' + name);
     }
     const { title, description } = head(id, sourceRoot);
@@ -77,6 +77,7 @@ function sitemap(output, pages) {
 export function generate(output, inventory, config, snapshot, previous = {}, sourceRoot = join(ROOT, 'site')) {
   const pages = readPages(inventory, sourceRoot);
   for (const folder of collections) {
+    if (folder === 'docs' && !pages.some(p => p.output === 'docs/index.html' && p.generated)) continue;
     let selected = pages.filter(p => p.output.startsWith(folder + '/') && p.output !== folder + '/index.html' && !p.bookmark).sort(newest);
     if (folder === 'health') {
       if (selected.length > config.reports.weeklyKeep || selected.some(p => p.output.split('/').at(-1).startsWith(config.reports.prefix + '-spot-'))) throw new Error(`Health publication is limited to ${config.reports.weeklyKeep} weekly reviews and no spot reports; run health retention first`);
@@ -88,7 +89,7 @@ export function generate(output, inventory, config, snapshot, previous = {}, sou
   const reports = pages.filter(p => !p.bookmark && (/^(health|incidents)\//.test(p.output) && !p.output.endsWith('/index.html') || !p.output.includes('/') && !['index.html', 'status.html', 'sitemap.html', '404.html'].includes(p.output))).map(p => p.output.startsWith('health/') ? { ...p, title: 'Weekly review' } : p).sort(newest);
   page(output, 'reports/index.html', 'reports', `<ul class="reports">${rows(reports, true)}</ul>`);
   sitemap(output, pages);
-  if (pages.some(p => p.output === 'index.html' && p.generated)) page(output, 'index.html', 'dashboard', renderDashboard(snapshot, config, previous));
+  if (pages.some(p => p.output === 'index.html' && p.generated)) page(output, 'index.html', 'dashboard', renderDashboard(snapshot, config, previous, new Date(), pages.find(p => p.output === 'docs/services/backups.html')?.href));
   if (pages.some(p => p.output === 'docs/inventory/observed.html' && p.generated)) {
     let content = '<p>Observed: ' + e(snapshot.observed_at || 'Not collected') + '</p>';
     for (const host of config.hosts) {

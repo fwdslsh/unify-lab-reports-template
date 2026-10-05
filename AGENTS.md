@@ -1,33 +1,35 @@
 # Lab reports template
 
-Native unify init is the primary installation path. A site repository, Docker
-and automatic publishing are optional. Follow docs/agent-install.md and DEPLOY.md.
-Only Git-backed Docker publishing needs Git/Compose, not host Bun. For configuration use docs/configuration.md;
-for native template updates use docs/template-updates.md. Use Unify 0.11.2+:
-preview with unify update --dry-run, then update. Never rerun init over operator
-data, overwrite a conflict, or guess an older site's adoption baseline.
+Use native Unify 0.11.5+ init, dev, build and update. A site repository,
+Docker and automatic publishing are optional. Follow docs/agent-install.md,
+DEPLOY.md and docs/template-updates.md; do not add an installer/updater wrapper.
 
-Keep this a normal Unify project. site/ is authored source; generators write
-only Unify's overlay. Authored chrome and slotted section templates live in
-flat site/_includes/. They must preview without generated files. An authored
-site/index.html or site/index.md overrides the generated dashboard. config.json
-contains only collection/monitoring policy, not presentation. Do not add a custom
-template language, source crawler, database, Python dependency, host background
-service, duplicate configuration registry or custom init wrapper.
-unify.template.json is native ownership/baseline metadata, not lab settings.
-Preserve it in installed sites. Template authors declare owned paths there;
-Unify itself writes the installed project's hashes and recorded source.
+Keep this a normal Unify project. Authored layouts, includes and slotted
+section templates live in site/_includes/ and preview without generated files.
+Generators write only Unify's overlay. An authored site/index.html or
+site/index.md overrides the generated dashboard.
 
-Bun runs the JavaScript tools and tests. Collection is explicit, bounded,
-read-only and default-off. Native SSH trust/permissions are operator-owned.
-Builds never collect. Never publish credentials, HTTP bodies, raw journal text,
-container environments or unrelated files. No Docker socket/root container.
+Ship starter configuration and content only under site/_examples/. Operators
+copy examples to config.json or their authored site paths. With no config.json,
+safe empty defaults apply; an explicitly selected missing config is an error.
+Configuration is collection/monitoring policy, not presentation.
 
-Keep dashboard alerts, visible host metrics, container health, backup evidence,
-search and mobile bottom navigation. Missing evidence stays unknown. Running
-is not healthy, HTTP success is not authenticated readiness, and backup success
-is not a restore test.
+Native init records template: in unify.yaml. No JSON ownership/hash manifest.
+Update copies every shipped path after confirmation. Preview first; decline
+if shared-file customizations need preserving. Actual config/content outside
+shipped paths are untouched. Never silently accept overwrites or rerun init over
+operator data. See docs/template-updates.md for the exact contract.
 
-Verify bun run test, bun run check, bun run build, shell syntax, root Compose and
-the npm payload. Do not change an existing lab's production site through this
-template. No npm publication without explicit authorization and release gates.
+Bun runs the JavaScript tools/tests. Collection is explicit, bounded, read-only
+and default-off. Builds never collect. Native SSH trust is operator-owned.
+No database, Python, host background service, duplicated configuration registry,
+custom template language, source crawler, root container or Docker socket.
+Never publish credentials, HTTP bodies, raw journals or container environments.
+
+Preserve dashboard alerts, host metrics, container health, backup evidence,
+search and mobile bottom navigation. Missing evidence stays unknown.
+Running is not healthy; HTTP success is not authenticated readiness;
+backup success is not a restore test.
+
+Verify tests, strict builds/audit, shell syntax, Compose and the actual npm
+payload. No npm publication without explicit authorization and release gates.
