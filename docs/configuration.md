@@ -9,7 +9,7 @@ not in config.json or site content.
 
 ```json
 {
-  "site": { "brand": "My lab", "title": "Lab reports" },
+  "site": { "brand": "lab", "title": "Lab reports" },
   "hosts": [],
   "endpoints": [
     { "id": "files", "label": "Files", "url": "https://files.example.net/health" }
@@ -34,7 +34,7 @@ whole configuration. Native remote probes need no Python or Node.
 ## Optional site settings
 
 site supports brand, title, description, footer, prefix (brand mark, not URL
-base path), badge, filesUrl and filesLabel. The defaults are “My lab”, “Lab
+base path), badge, filesUrl and filesLabel. The defaults are “lab”, “Lab
 reports”, “Lab reports and dashboard”, “Private lab reports”, “/”, “Lab”, empty
 filesUrl, and “Shared files”. Empty filesUrl hides the shared-files link.
 
