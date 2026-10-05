@@ -6,6 +6,8 @@
     "unify.yaml",
     "compose.yaml",
     "site/index.html",
+    "site/_layout.html",
+    "site/_includes/**",
     "site/articles/**",
     "site/incidents/**",
     "site/health/**",

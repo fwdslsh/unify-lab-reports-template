@@ -30,23 +30,42 @@ author's owned-only manifest over it. It is not a second lab configuration file.
 | --- | --- |
 | config.json, unify.yaml, compose.yaml, project README/changelog | scripts/ and site tests/ |
 | authored articles, incidents, reviews and guides | deploy/ and setup documentation |
-| observation state and published output | shared includes/layout/navigation |
+| authored layout, header, footer and section templates | shared generator/collection tools |
+| observation state and published output | unmodified base theme |
 | site-specific package identity/build flags | setup/reference documentation |
 | intentional CSS/layout/Compose customizations | unmodified base theme/tooling |
 
 The template's native owned manifest protects config/build/deployment seeds,
-the homepage, authored content directories and custom.css. Existing .env, SSH
+an optional authored homepage, layout, site/_includes/, authored content directories and custom.css. Existing .env, SSH
 files, state and output are also declared site-owned and are never distributed.
 Your other added files are not template inputs and are left alone. Shared files
 you edit, such as CSS/layout or collectors, are protected by conflict detection.
 Review new default configuration/Compose suggestions manually; ownership means
 an update does not replace your settings, even when the seed was unmodified.
 
-The homepage and sample article are starter content. Existing files remain yours;
-missing owned seeds can be added by an update. Review the dry run if you removed
-a starter page or have your own dashboard. Docker Compose overrides and
+The section templates and sample article are starter content. Existing files
+remain yours; missing owned seeds can be added by an update. The dashboard
+homepage is generated unless you supply an authored index.html or index.md.
+Docker Compose overrides and
 site/assets/custom.css are ordinary options for deployment/theme additions; no
 additional override file is required.
+
+## Sites using generated chrome
+
+This revision replaces root includes/ and temporary _generated/ chrome with
+authored site/_includes/ files. Review the update dry run, then move any custom
+branding, footer links and section copy from the old config.json `site` object
+into those HTML files. Remove only that `site` object from configuration;
+hosts, endpoints and monitoring policy remain unchanged. New configuration
+validation points to the HTML files if the old presentation settings remain.
+
+An old starter site/index.html that only includes /_generated/dashboard.html
+must be removed after review so the generator can produce the homepage. Keep
+any real authored or externally collected homepage. If your old layout was
+customized, retain those changes while updating its include paths to
+/_includes/header.html and /_includes/footer.html. No include should depend on
+the build overlay. Unify update preserves owned HTML; it does not rewrite your
+customizations. Preview the layout/navigation, then run an audited build.
 
 ## Conflicts and failures
 

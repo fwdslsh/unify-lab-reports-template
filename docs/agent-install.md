@@ -27,8 +27,10 @@ No npm publication, host services or unrelated infrastructure changes are implie
    data is not excluded automatically. Native init skips root package manifests
    and lockfiles. Use unify directly; do not add an installer wrapper.
    Preserve the generated unify.template.json baseline with the site's sources.
-3. Edit config.json with reviewed non-secret lab identity/endpoints and add
-   authored content under site/. Preserve existing settings/content on later edits.
+3. Edit config.json with reviewed non-secret endpoints/monitoring policy. Set
+   branding in site/_includes/header.html and footer links in footer.html; add
+   authored content under site/. Preview the layout/includes with unify dev.
+   Preserve existing settings/content on later edits.
 4. Run unify build --clean --audit --strict. Verify dist/index.html and the
    generated navigation. A successful command alone is not the final check.
 5. Serve/upload only dist/ with the existing static host. For a Docker web server,

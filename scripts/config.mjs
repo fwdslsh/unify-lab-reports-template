@@ -27,13 +27,8 @@ export function allowedWindow(item, now = new Date()) {
   return start < end ? start <= clock && clock < end : clock >= start || clock < end;
 }
 export function validateConfig(input) {
-  keys(input, ['site', 'reports', 'hosts', 'endpoints', 'thresholds', 'backups', 'exclusions'], 'config.json');
-  const siteKeys = ['brand', 'title', 'description', 'footer', 'prefix', 'badge', 'filesUrl', 'filesLabel', 'homeLabel', 'articlesDescription', 'incidentsDescription', 'healthDescription', 'healthIntro', 'reportsDescription', 'reportsIntro', 'directoryDescription', 'sitemapDescription'];
-  for (const [key, allowed] of [['site', siteKeys], ['reports', ['prefix', 'timezone', 'weeklyKeep']], ['thresholds', ['memoryWarningPercent', 'diskWarningPercent', 'criticalPercent', 'loadPerCore', 'staleAfterMinutes']], ['backups', ['jobs', 'expectations']], ['exclusions', ['containers', 'endpoints', 'backups']]]) if (key in input) keys(input[key], allowed, key);
-  const site = { brand: 'home', title: 'Lab reports', description: 'Lab reports and dashboard', footer: 'Private lab reports', prefix: '/', badge: 'Lab', filesUrl: '', filesLabel: 'Shared files', ...input.site };
-  keys(site, siteKeys, 'site');
-  if (Object.values(site).some(v => typeof v !== 'string')) throw new Error('Site settings must be text');
-  if (site.filesUrl && !(site.filesUrl.startsWith('/') && !site.filesUrl.startsWith('//'))) httpURL(site.filesUrl);
+  keys(input, ['reports', 'hosts', 'endpoints', 'thresholds', 'backups', 'exclusions'], 'config.json (presentation belongs in site/_layout.html and site/_includes/)');
+  for (const [key, allowed] of [['reports', ['prefix', 'timezone', 'weeklyKeep']], ['thresholds', ['memoryWarningPercent', 'diskWarningPercent', 'criticalPercent', 'loadPerCore', 'staleAfterMinutes']], ['backups', ['jobs', 'expectations']], ['exclusions', ['containers', 'endpoints', 'backups']]]) if (key in input) keys(input[key], allowed, key);
   const reports = { prefix: 'lab', timezone: 'UTC', weeklyKeep: 2, ...input.reports };
   keys(reports, ['prefix', 'timezone', 'weeklyKeep'], 'reports');
   if (!safeID(reports.prefix) || !Number.isInteger(reports.weeklyKeep) || reports.weeklyKeep < 1 || reports.weeklyKeep > 100) throw new Error('Reports need a safe prefix and weeklyKeep from 1 to 100');
@@ -83,7 +78,7 @@ export function validateConfig(input) {
   for (const mapping of Object.values(exclusions)) {
     if (!mapping || typeof mapping !== 'object' || Array.isArray(mapping) || Object.values(mapping).some(v => typeof v !== 'string' || !v.trim())) throw new Error('Exclusions map patterns to reasons');
   }
-  return { site, reports, hosts, endpoints, thresholds, backups, exclusions };
+  return { reports, hosts, endpoints, thresholds, backups, exclusions };
 }
 export function loadConfig(path = runtimePath('CONFIG_FILE', 'config.json')) { return validateConfig(JSON.parse(readFileSync(path, 'utf8'))); }
 export function readSnapshot(path = runtimePath('SNAPSHOT_FILE', 'state/observed.json')) {

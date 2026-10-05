@@ -9,7 +9,6 @@ not in config.json or site content.
 
 ```json
 {
-  "site": { "brand": "home", "title": "Lab reports" },
   "hosts": [],
   "endpoints": [
     { "id": "files", "label": "Files", "url": "https://files.example.net/health" }
@@ -31,17 +30,36 @@ may be empty; without observations the dashboard says “Not collected.”
 Those examples extend config.json; merge the relevant keys, do not replace your
 whole configuration. Native remote probes need no Python or Node.
 
-## Optional site settings
+## Presentation is ordinary HTML
 
-site supports brand, title, description, footer, prefix (brand mark, not URL
-base path), badge, filesUrl and filesLabel. The defaults are “home”, “Lab
-reports”, “Lab reports and dashboard”, “Private lab reports”, “/”, “Lab”, empty
-filesUrl, and “Shared files”. Empty filesUrl hides the shared-files link.
+| Edit | Source file |
+| --- | --- |
+| Brand, home link and badge | site/_includes/header.html |
+| Navigation | site/_includes/nav.html |
+| Footer and optional shared-files link | site/_includes/footer.html |
+| Default site title/description, page shell | site/_layout.html |
+| Section titles/descriptions | site/_includes/*-head.html |
+| Section headings, introductions and empty states | site/_includes/*.fragment.html |
 
-Existing sites may optionally preserve custom homeLabel and section copy with
-articlesDescription, incidentsDescription, healthDescription, healthIntro,
-reportsDescription, reportsIntro, directoryDescription and sitemapDescription.
-Leave these out unless you intentionally customize that text.
+Keep a title and `<meta name="description" content="…">` in each section head.
+The generator reads those seven heads to label its own navigation entries; it
+does not crawl source files or compose HTML. Unify handles includes, head merging
+and slot fills. Section bodies use a bare slot with a useful preview fallback;
+the generator fills it with actual lists or observations only during builds.
+There are no generated includes needed by the layout.
+
+Run `unify dev` and open `/_unify/preview/_layout.html` or
+`/_unify/preview/_includes/nav.html` to preview authored source.
+Open `/_unify/preview/_includes/dashboard.fragment.html` for the empty
+dashboard template. To preview the layout with an authored page, open
+`/_unify/preview/_layout.html?page=articles/welcome.md`. No build is required first.
+
+The layout's named `brand` and `footer` slots have authored defaults. An HTML
+page can supply `<div slot="brand">…</div>` or `<p slot="footer">…</p>` in its
+body; ordinary body content fills the main slot. Markdown uses the same layout
+defaults. Avoid moving presentation back into JSON or a second template syntax.
+
+## Monitoring policy
 
 reports supports prefix (lab), timezone (UTC) and weeklyKeep (2). Retention only
 manages matching timestamped prefix-spot/prefix-review files. Omitted thresholds
@@ -52,7 +70,7 @@ staleAfterMinutes. Backups/exclusions default empty, not “protected.”
 
 URL composition/build options belong in standard unify.yaml. For a site hosted
 below a URL path, configure Unify's base-url/pretty-urls there; do not change
-site.prefix expecting it to rewrite URLs.
+the header's brand mark expecting it to rewrite URLs.
 
 ## Optional Git publisher settings (private .env)
 

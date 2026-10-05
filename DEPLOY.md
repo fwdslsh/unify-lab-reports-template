@@ -149,7 +149,7 @@ or erase state/credentials to fix a failed build.
 
 - No output: check builder logs, Git access and directory ownership.
 - Old content: inspect deployment.json; confirm changes were committed/pushed.
-- Wrong branding: config.json in the fetched Git revision is authoritative.
+- Wrong branding: check site/_includes/header.html in the fetched Git revision.
 - No observations: collection is off by default; inspect its timestamp and SSH.
 - Permission-denied or unknown checks: inspect account permissions, not blanket sudo.
 - HTTP 404 after publication: confirm Caddy mounts the parent published directory.

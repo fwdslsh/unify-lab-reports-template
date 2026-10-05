@@ -30,10 +30,10 @@ function fixture(form = 'directory') {
   const source = form === 'git' ? 'file://' + template + '#main' : template;
   const run = args => spawnSync('bun', [cli, ...args], { cwd: project, env: fixtureEnvironment(), encoding: 'utf8' });
   const changed = () => {
-    write(join(template, 'config.json'), '{"site":{"brand":"Incoming default, never reset user settings"}}');
+    write(join(template, 'config.json'), '{"reports":{"weeklyKeep":4}}');
     write(join(template, 'compose.yaml'), '# Incoming deployment defaults\n');
     write(join(template, 'unify.yaml'), '# Incoming build defaults\n');
-    write(join(template, 'site/index.html'), '<!-- Incoming homepage seed -->');
+    write(join(template, 'site/_includes/header.html'), readFileSync(join(template, 'site/_includes/header.html'), 'utf8').replace('home</a>', 'Incoming lab</a>'));
     write(join(template, 'site/articles/welcome.md'), '# Incoming welcome seed');
     write(join(template, 'scripts/html.mjs'), readFileSync(join(template, 'scripts/html.mjs'), 'utf8') + '\n// Upstream shared improvement\n');
     write(join(template, 'scripts/new-fixture.mjs'), '// Newly shared fixture\n');
@@ -47,10 +47,11 @@ for (const form of ['directory', 'git']) test(`native ${form} update changes sha
   const f = fixture(form);
   try {
     const initialized = f.run(['init', f.source]); expect(initialized.status, initialized.stderr).toBe(0);
-    write(join(f.project, 'config.json'), '{"site":{"brand":"My configured lab"}}');
+    write(join(f.project, 'config.json'), '{"reports":{"weeklyKeep":3}}');
+    const header = join(f.project, 'site/_includes/header.html'); write(header, readFileSync(header, 'utf8').replace('home</a>', 'My configured lab</a>'));
     for (const name of ['.env', 'ssh/key', 'state/private.txt', 'published/private.txt', 'site/assets/custom.css']) write(join(f.project, name), 'private fixture bytes');
     write(join(f.project, 'site/articles/custom.md'), '---\ntitle: Custom\ndescription: My article\n---\n# My article\n');
-    const protectedFiles = ['config.json', 'compose.yaml', 'unify.yaml', 'site/index.html', 'site/articles/welcome.md', 'site/articles/custom.md', '.env', 'ssh/key', 'state/private.txt', 'published/private.txt', 'site/assets/custom.css'];
+    const protectedFiles = ['config.json', 'compose.yaml', 'unify.yaml', 'site/_includes/header.html', 'site/articles/welcome.md', 'site/articles/custom.md', '.env', 'ssh/key', 'state/private.txt', 'published/private.txt', 'site/assets/custom.css'];
     const before = digest(f.project);
     f.changed();
     const preview = f.run(['update', '--dry-run']); expect(preview.status, preview.stderr).toBe(0);
@@ -97,7 +98,7 @@ test('adoption records an older site without changing its files, then updates th
   try {
     cpSync(f.template, f.project, { recursive: true, filter: path => !path.endsWith('/unify.template.json') });
     write(join(f.template, 'unify.template.json'), '{}'); // Older template had no owned declaration.
-    write(join(f.project, 'config.json'), '{"site":{"brand":"Existing site"}}');
+    write(join(f.project, 'config.json'), '{"reports":{"weeklyKeep":3}}');
     const before = digest(f.project);
     expect(f.run(['update']).status).toBe(2);
     expect(f.run(['update', '--adopt', f.source, '--dry-run']).status).toBe(0);
@@ -107,7 +108,7 @@ test('adoption records an older site without changing its files, then updates th
     write(join(f.template, 'unify.template.json'), readFileSync(join(root, 'unify.template.json'), 'utf8'));
     f.changed();
     const updated = f.run(['update']); expect(updated.status, updated.stderr).toBe(0);
-    expect(readFileSync(join(f.project, 'config.json'), 'utf8')).toContain('Existing site');
+    expect(readFileSync(join(f.project, 'config.json'), 'utf8')).toContain('weeklyKeep');
     expect(readFileSync(join(f.project, 'scripts/html.mjs'), 'utf8')).toContain('Upstream shared improvement');
   } finally { f.close(); }
 });

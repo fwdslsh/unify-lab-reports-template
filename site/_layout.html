@@ -4,20 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex">
-    <include src="/_generated/head.html"></include>
+    <title>— Lab reports</title>
+    <meta name="description" content="Lab reports and dashboard">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <div class="site-brand">
-        <include src="/_generated/brand.html"></include>
-      </div>
-      <include src="/includes/nav.html"></include>
+      <include src="/_includes/header.html"></include>
     </header>
-    <main id="main"><slot></slot></main>
+    <main id="main"><slot><h1>Lab dashboard</h1><p>Page content appears here.</p></slot></main>
     <footer class="site-footer">
-      <slot name="footer"><include src="/includes/footer.html"></include></slot>
+      <slot name="footer"><include src="/_includes/footer.html"></include></slot>
     </footer>
     <script type="module">
       const section = location.pathname.startsWith('/articles/') ? 'articles'

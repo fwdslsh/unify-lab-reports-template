@@ -97,7 +97,7 @@ test('one config file changes publication; unrelated environment does not', () =
     assert.equal(f.run().status, 0);
     const original = readlinkSync(join(f.env.PUBLISH_DIR, 'current'));
     f.env.CONFIG_FILE = join(f.root, 'config.json');
-    writeFileSync(f.env.CONFIG_FILE, '{"site":{"brand":"Alternate lab"}}');
+    writeFileSync(f.env.CONFIG_FILE, '{"reports":{"weeklyKeep":3}}');
     assert.equal(f.run().status, 0);
     const configured = readlinkSync(join(f.env.PUBLISH_DIR, 'current'));
     assert.notEqual(configured, original);
@@ -107,7 +107,7 @@ test('one config file changes publication; unrelated environment does not', () =
     f.env.UNRELATED_SECRET = 'not-an-input';
     assert.equal(f.run().stdout, '');
     writeFileSync(f.env.BUN, '#!/bin/sh\nexit 1\n', { mode: 0o755 });
-    writeFileSync(f.env.CONFIG_FILE, '{"site":{"brand":"Another lab"}}');
+    writeFileSync(f.env.CONFIG_FILE, '{"reports":{"weeklyKeep":4}}');
     assert.notEqual(f.run().status, 0);
     assert.equal(readlinkSync(join(f.env.PUBLISH_DIR, 'current')), configured);
     assert.equal(f.publicFile(), 'same source');

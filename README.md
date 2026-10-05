@@ -23,7 +23,7 @@ Directory sources must be clean: Unify copies regular files, including ignored
 runtime data if present. The npm package will provide another source once
 published; it is not published yet.
 
-Edit `config.json` with your lab name, then write Markdown/HTML under `site/`.
+Edit the branding in `site/_includes/header.html`, then write Markdown/HTML under `site/`.
 Preview with `unify dev`. Publish by building and serving **only dist/** with
 any static web server:
 
@@ -43,9 +43,14 @@ not that the lab is healthy.
 
 ## Configure
 
-- `config.json`: branding, hosts, endpoints and optional monitoring policy.
+- `config.json`: hosts, endpoints and optional monitoring policy.
 - `.env`: optional private deployment/collection settings; not needed to build.
-- `site/`: your Markdown/HTML reports and guides.
+- `site/`: your Markdown/HTML reports, guides, layout and presentation.
+
+All includes live in `site/_includes/`. Edit the header/footer and section
+templates directly; `unify dev` previews them without a generator or collected
+data. Generated lists fill their native slots during a build. An authored
+`site/index.html` or `site/index.md` can replace the generated dashboard.
 
 Defaults keep two weekly reviews, no spot reports, and conservative alert
 thresholds. Only add optional settings when you need to change them. Examples

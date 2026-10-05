@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Authored chrome and native slotted section templates in site/_includes/; previews no longer need generated includes.
+- Presentation lives in HTML, separate from collection/monitoring config.json. Existing authored dashboards remain supported.
 - Separate template-maintainer tests from reusable site tests; preserve site README/changelog on native updates.
 - Public GitHub mirror and GitHub-only, tag-gated npm trusted-publishing workflow.
 - Native Unify-first setup; Git-backed Docker publishing is optional.
@@ -11,8 +13,8 @@
 - Pinned image-baked Unify 0.11.2 and configuration/content-preserving update tests.
 
 - MIT-only template, including the theme, authorized by the project owner.
-- One config.json for site identity and lab/report policy; optional deployment-only .env.
-- Explicit site/index.html and flat includes/.
+- One config.json for lab/report policy; optional deployment-only .env.
+- A generated dashboard unless the site supplies an authored homepage.
 - Bun/JavaScript tools and tests; native remote probes need no Python, Node or jq.
 - Publisher reads configuration from the fetched Git revision for collection and builds.
 

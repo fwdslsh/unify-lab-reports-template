@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadConfig, validateConfig, inputHash, readSnapshot, allowedWindow } from '../scripts/config.mjs';
 
-test('one config supplies defaults, branding and report policy', () => {
-  const config = validateConfig({ site: { brand: 'Example' }, reports: { prefix: 'my-lab', weeklyKeep: 3, timezone: 'America/Chicago' } });
-  expect(config.site.brand).toBe('Example'); expect(config.reports.weeklyKeep).toBe(3);
+test('one config supplies only operational defaults and report policy', () => {
+  const config = validateConfig({ reports: { prefix: 'my-lab', weeklyKeep: 3, timezone: 'America/Chicago' } });
+  expect(config).not.toHaveProperty('site'); expect(config.reports.weeklyKeep).toBe(3);
   expect(loadConfig().hosts).toEqual([]); expect(config.backups.jobs).toEqual([]);
 });
 const invalid = [
@@ -27,7 +27,7 @@ test('fingerprints use input files, never unrelated secrets or branding environm
     expect(inputHash({})).toBe(''); expect(inputHash({ PRIVATE_TOKEN: 'secret', SITE_BRAND: 'not configuration' })).toBe('');
     const one = inputHash({ CONFIG_FILE: path }); expect(one).toHaveLength(64);
     expect(inputHash({ CONFIG_FILE: path, PRIVATE_TOKEN: 'changed' })).toBe(one);
-    writeFileSync(path, '{"site":{"brand":"Changed"}}'); expect(inputHash({ CONFIG_FILE: path })).not.toBe(one);
+    writeFileSync(path, '{"reports":{"weeklyKeep":3}}'); expect(inputHash({ CONFIG_FILE: path })).not.toBe(one);
   } finally { rmSync(temp, { recursive: true, force: true }); }
 });
 test('snapshot parsing excludes unknown fact fields and rejects unsafe URLs', () => {

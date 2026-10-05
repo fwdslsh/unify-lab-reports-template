@@ -25,7 +25,7 @@ test('generation is repeatable, escapes search data, and includes historical rep
     const pages = inventory([record('index.html', 'Lab dashboard'), record('old.html', 'Old & <new>', [{ name: 'role', content: 'history' }]), record('articles/series2.md', 'Second', [{ name: 'series', content: 'Series' }, { name: 'part', content: '2' }]), record('articles/series1.md', 'First', [{ name: 'series', content: 'Series' }, { name: 'part', content: '1' }]), record('old-bookmark.html', 'Archived bookmark', [{ name: 'role', content: 'bookmark' }])]);
     const config = validateConfig({}), snapshot = { observed_at: null, hosts: {}, endpoints: [] };
     generate(temp, pages, config, snapshot);
-    expect(readFileSync(join(temp, '_generated/brand.html'), 'utf8')).toContain('<span>/</span>home</a>');
+    expect(existsSync(join(temp, '_generated'))).toBe(false);
     const reports = readFileSync(join(temp, 'reports/index.html'), 'utf8'), sitemap = readFileSync(join(temp, 'sitemap.html'), 'utf8'), articles = readFileSync(join(temp, 'articles/index.html'), 'utf8');
     expect(reports).toContain('Old &amp; &lt;new&gt;'); expect(reports).not.toContain('<time'); expect(reports).not.toContain('Archived bookmark');
     expect(sitemap).toContain('Archived bookmark'); expect(sitemap).toContain('Other pages and bookmarks'); expect(sitemap).toContain('<noscript>'); expect(sitemap).toContain('data-search=');
@@ -44,34 +44,30 @@ test('the one retention setting controls both generation and retention', () => {
     expect(() => generate(temp, inventory([record('health/lab-spot-1.md', 'Spot', [], '2026-09-01')]), validateConfig({}), snapshot)).toThrow('no spot');
   } finally { rmSync(temp, { recursive: true, force: true }); }
 });
-test('flat includes, explicit homepage and original responsive theme are normal source', () => {
-  const layout = readFileSync(join(root, 'site/_layout.html'), 'utf8'), nav = readFileSync(join(root, 'includes/nav.html'), 'utf8'), css = readFileSync(join(root, 'site/styles.css'), 'utf8');
-  expect(layout).toContain('/includes/nav.html'); expect(layout).not.toContain('includes/base/'); expect(existsSync(join(root, 'site/index.html'))).toBe(true);
+test('authored chrome, dashboard template and original responsive theme are normal source', () => {
+  const layout = readFileSync(join(root, 'site/_layout.html'), 'utf8'), nav = readFileSync(join(root, 'site/_includes/nav.html'), 'utf8'), css = readFileSync(join(root, 'site/styles.css'), 'utf8');
+  expect(layout).toContain('/_includes/header.html'); expect(layout).not.toContain('_generated/'); expect(existsSync(join(root, 'site/_includes/dashboard.fragment.html'))).toBe(true);
   for (const label of ['Reports', 'Guides', 'Articles', 'All pages']) expect(nav).toContain(`<span>${label}</span>`);
   expect(css).toContain('--primary: #3fb950'); expect(css).toContain('env(safe-area-inset-bottom'); expect(css).toContain('position: fixed'); expect(css).toContain('min-height: 56px');
 });
-test('site-owned section copy and home label survive shared generator updates', () => {
+test('generator fills authored templates, not a second presentation registry', () => {
   const temp = mkdtempSync(join(tmpdir(), 'custom-section-copy.'));
   try {
-    const site = { homeLabel: 'My dashboard', articlesDescription: 'Custom articles', healthDescription: 'Custom health', healthIntro: 'Custom health intro', reportsDescription: 'Custom report metadata', reportsIntro: 'Custom report intro', directoryDescription: 'Custom directory metadata', sitemapDescription: 'Custom sitemap metadata', incidentsDescription: 'Custom incidents' };
-    generate(temp, inventory([]), validateConfig({ site }), { observed_at: null, hosts: {}, endpoints: [] });
-    expect(readFileSync(join(temp, 'articles/index.html'), 'utf8')).toContain('Custom articles');
-    expect(readFileSync(join(temp, 'health/index.html'), 'utf8')).toContain('Custom health intro');
-    expect(readFileSync(join(temp, 'reports/index.html'), 'utf8')).toContain('Custom report intro');
-    expect(readFileSync(join(temp, 'sitemap.html'), 'utf8')).toContain('Custom sitemap metadata');
-    expect(readFileSync(join(temp, '_generated/brand.html'), 'utf8')).toContain('My dashboard');
+    generate(temp, inventory([]), validateConfig({}), { observed_at: null, hosts: {}, endpoints: [] });
+    expect(readFileSync(join(temp, 'articles/index.html'), 'utf8')).toContain('<include src="/_includes/articles.fragment.html"><ul');
+    expect(readFileSync(join(temp, 'index.html'), 'utf8')).toContain('/_includes/dashboard.fragment.html');
+    expect(existsSync(join(temp, '_generated/head.html'))).toBe(false);
   } finally { rmSync(temp, { recursive: true, force: true }); }
 });
 function project() {
   const path = mkdtempSync(join(tmpdir(), 'unify-project.'));
-  for (const name of ['scripts', 'includes', 'config.json', 'unify.yaml', 'package.json', 'bun.lock']) cpSync(join(root, name), join(path, name), { recursive: true });
+  for (const name of ['scripts', 'config.json', 'unify.yaml', 'package.json', 'bun.lock']) cpSync(join(root, name), join(path, name), { recursive: true });
   mkdirSync(join(path, 'site'));
-  for (const name of ['_layout.html', 'styles.css', 'assets']) cpSync(join(root, 'site', name), join(path, 'site', name), { recursive: true });
+  for (const name of ['_layout.html', '_includes', 'styles.css', 'assets']) cpSync(join(root, 'site', name), join(path, 'site', name), { recursive: true });
   const env = fixtureEnvironment();
   const run = args => spawnSync('bun', args, { cwd: path, env, encoding: 'utf8' });
   const install = run(['install', '--frozen-lockfile', '--ignore-scripts']); expect(install.status, install.stderr).toBe(0);
   const write = (name, text) => { const file = join(path, 'site', name); mkdirSync(join(file, '..'), { recursive: true }); writeFileSync(file, text); };
-  write('index.html', '<!doctype html><html lang="en"><head><title>Lab dashboard</title><meta name="description" content="Lab observations"></head><body class="wide"><include src="/_generated/dashboard.html"></include></body></html>');
   write('docs/index.md', '---\ntitle: Guides\ndescription: Lab guide\n---\n# Guides\n[Backups](services/backups.html)\n');
   write('docs/services/backups.md', '---\ntitle: Backups\ndescription: Backup guide\n---\n# Backups\n');
   const html = name => readFileSync(join(path, 'dist', name), 'utf8');
@@ -82,7 +78,7 @@ test('real Unify builds, rewrites prefixed URLs and indexes metadata/content wit
   try {
     f.write('articles/first.md', '---\ntitle: First\ndescription: Series entry\nseries: Models\npart: 1\ntags: [models, lab]\n---\n# First\nBodyOnlyCanary\n');
     writeFileSync(join(f.path, '.env'), 'PRIVATE_TOKEN=never-publish-canary'); writeFileSync(join(f.path, 'site/.env'), 'never-publish-canary');
-    const config = JSON.parse(readFileSync(join(f.path, 'config.json'), 'utf8')); config.site.brand = 'Fresh <lab>'; writeFileSync(join(f.path, 'config.json'), JSON.stringify(config));
+    const brandPath = join(f.path, 'site/_includes/header.html'); writeFileSync(brandPath, readFileSync(brandPath, 'utf8').replace('home</a>', 'Fresh &lt;lab&gt;</a>'));
     const result = f.run(['run', 'build', '--', '--base-url', 'https://example.test/lab/', '--pretty-urls']); expect(result.status, result.stderr).toBe(0);
     const home = f.html('index.html'); expect(home).toContain('Fresh &lt;lab&gt;'); expect(home).toContain('/lab/docs/'); expect(home).not.toContain('never-publish-canary'); expect(home).not.toContain('<input');
     expect(f.html('sitemap/index.html')).toContain('models lab'); expect(f.html('assets/unify/search-corpus.json')).toContain('BodyOnlyCanary');

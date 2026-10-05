@@ -18,7 +18,6 @@
   },
   "files": [
     "site/",
-    "includes/",
     "scripts/*.mjs",
     "scripts/deploy.sh",
     "scripts/probes/",

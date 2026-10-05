@@ -8,8 +8,10 @@ preview with unify update --dry-run, then update. Never rerun init over operator
 data, overwrite a conflict, or guess an older site's adoption baseline.
 
 Keep this a normal Unify project. site/ is authored source; generators write
-only Unify's overlay. site/index.html is explicit, includes/ is flat, and
-config.json is the only site/lab configuration file. Do not add a custom
+only Unify's overlay. Authored chrome and slotted section templates live in
+flat site/_includes/. They must preview without generated files. An authored
+site/index.html or site/index.md overrides the generated dashboard. config.json
+contains only collection/monitoring policy, not presentation. Do not add a custom
 template language, source crawler, database, Python dependency, host background
 service, duplicate configuration registry or custom init wrapper.
 unify.template.json is native ownership/baseline metadata, not lab settings.

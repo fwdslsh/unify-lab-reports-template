@@ -29,14 +29,14 @@ for (const form of ['directory', 'git']) test(`native ${form} init builds withou
     expect(existsSync(join(site, 'bun.lock'))).toBe(false);
     expect(existsSync(join(site, '.git'))).toBe(false);
     expect(existsSync(join(site, '.env'))).toBe(false);
-    for (const name of ['config.json', 'compose.yaml', 'docs/agent-install.md', 'site/index.html', 'scripts/gen.mjs']) expect(existsSync(join(site, name))).toBe(true);
+    for (const name of ['config.json', 'compose.yaml', 'docs/agent-install.md', 'site/_includes/dashboard.fragment.html', 'scripts/gen.mjs']) expect(existsSync(join(site, name))).toBe(true);
     const built = run(['build', '--clean', '--audit', '--strict'], site); expect(built.status, built.stderr).toBe(0);
     expect(readFileSync(join(site, 'dist/index.html'), 'utf8')).toContain('Not collected');
     const collection = spawnSync('bun', ['scripts/collect.mjs'], { cwd: site, env: fixtureEnvironment(), encoding: 'utf8' });
     expect(collection.status, collection.stderr).toBe(0);
     const preview = spawnSync('bun', ['scripts/retain-health.mjs'], { cwd: site, env: fixtureEnvironment(), encoding: 'utf8' });
     expect(preview.status, preview.stderr).toBe(0);
-    writeFileSync(join(site, 'config.json'), '{"site":{"brand":"Keep my lab"}}');
+    const header = join(site, 'site/_includes/header.html'); writeFileSync(header, readFileSync(header, 'utf8').replace('home</a>', 'Keep my lab</a>'));
     writeFileSync(join(site, '.env'), 'PRIVATE_TOKEN=keep-this-private');
     mkdirSync(join(site, 'state'), { recursive: true }); writeFileSync(join(site, 'state/private.txt'), 'runtime-canary');
     writeFileSync(join(site, 'site/articles/custom.md'), '---\ntitle: Keep\ndescription: Custom article\n---\n# Keep my article\n');
