@@ -30,6 +30,20 @@ test('real npm payload excludes private state and builds with only shipped files
     const names = packed.files.map(file => file.path);
     for (const required of ['.env.example', '.gitignore', 'bun.lock', 'site/_examples/config.json', 'site/_examples/articles/article.md', 'site/_examples/docs/index.md', 'compose.yaml', 'docs/agent-install.md', 'site/_includes/dashboard.fragment.html', 'site/_includes/nav.html', 'DEPLOY.md', 'LICENSE', 'scripts/gen.mjs', 'scripts/deploy.sh', 'scripts/probes/monitor.sh']) expect(names).toContain(required);
     expect(packed.name).toBe('@fwdslsh/unify-lab-reports-template');
+    // Exercise the workflow's actual command, never publishing or requesting provenance locally.
+    const workflow = readFileSync(join(root, '.github/workflows/release.yml'), 'utf8');
+    const publish = workflow.match(/^\s+(npm publish .+)$/m)?.[1];
+    expect(publish).toBeDefined();
+    expect(publish).toContain('"./${archives[0]}"');
+    const artifact = join(temp, 'package-artifact');
+    mkdirSync(artifact);
+    cpSync(join(temp, packed.filename), join(artifact, packed.filename));
+    const preview = JSON.parse(run('bash', ['-eu', '-o', 'pipefail', '-c',
+      'archives=(package-artifact/*.tgz)\n' + publish + ' --dry-run --provenance=false --json'
+    ], temp, { NPM_TAG: 'latest', npm_config_offline: 'true' }))[packed.name];
+    expect(preview.name).toBe(packed.name);
+    expect(preview.version).toBe(packed.version);
+    expect(preview.integrity).toBe(packed.integrity);
     expect(names).toContain('site/assets/theme.css');
     expect(names.some(name => name.endsWith('.py') || name.startsWith('includes/base/') || name.startsWith('LICENSES/'))).toBe(false);
     expect(names.some(name => /^(\.env$|state\/|ssh\/|published\/|dist\/|node_modules\/|\.git\/)/.test(name))).toBe(false);

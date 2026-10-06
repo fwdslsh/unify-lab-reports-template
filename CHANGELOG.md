@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Use an explicit local tarball path in the npm release workflow; test the real publish command with a dry run.
+
 ## 0.1.1
 
 - Native npm installation as the primary setup path, with Git and directory sources still supported.

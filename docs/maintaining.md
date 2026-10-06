@@ -76,9 +76,9 @@ GitHub (and Gitea for history):
 ```sh
 git remote add github https://github.com/fwdslsh/unify-lab-reports-template.git
 git push github HEAD:main
-git tag v0.1.1
-git push github v0.1.1
-git push origin v0.1.1
+git tag v0.1.2
+git push github v0.1.2
+git push origin v0.1.2
 ```
 
 Use the actual version and skip remote creation if already configured. Watch

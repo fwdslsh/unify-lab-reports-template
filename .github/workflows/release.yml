@@ -94,4 +94,4 @@ jobs:
           shopt -s nullglob
           archives=(package-artifact/*.tgz)
           [ "${#archives[@]}" -eq 1 ] || { echo 'Expected one tested package tarball' >&2; exit 1; }
-          npm publish "${archives[0]}" --access public --tag "$NPM_TAG" --provenance --ignore-scripts
+          npm publish "./${archives[0]}" --access public --tag "$NPM_TAG" --provenance --ignore-scripts
