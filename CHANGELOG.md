@@ -3,6 +3,7 @@
 ## 0.1.3
 
 - Add the `unify-template` keyword, which is how npm searches and the template list on fwdslsh.dev find a unify template.
+- Publish from main whenever package.json's version is not on npm yet, the way unify publishes its built-in templates; a release no longer needs a tag.
 
 ## 0.1.2
 
