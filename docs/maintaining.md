@@ -47,12 +47,14 @@ Gitea remains the development remote. Push reviewed main updates to the GitHub
 remote explicitly; no automatic cross-forge service or Gitea token in GitHub is
 needed. The public mirror is fwdslsh/unify-lab-reports-template.
 
-The GitHub release.yml workflow verifies main, pull requests and manual runs
-without publishing. It tests native directory/Git/npm installation, audits the
-build, validates shell/Compose and uploads the actual npm tarball. A pushed v*
-tag additionally publishes that exact tested tarball; it must match package.json.
-Prereleases use npm's next dist-tag; stable versions use latest. Manual runs only
-verify, so testing the workflow does not release a package.
+The GitHub release.yml workflow verifies main, pull requests and manual runs.
+It tests native directory/Git/npm installation, audits the build, validates
+shell/Compose and uploads the actual npm tarball. A push to main whose
+package.json version is not on npm yet additionally publishes that exact tested
+tarball, the way fwdslsh/unify publishes its built-in templates; a version npm
+already has is skipped. Prereleases use npm's next dist-tag; stable versions use
+latest. Pull requests and manual runs only verify, so testing the workflow does
+not release a package.
 
 Configure npm trusted publishing for @fwdslsh/unify-lab-reports-template:
 
@@ -64,24 +66,22 @@ Configure npm trusted publishing for @fwdslsh/unify-lab-reports-template:
 See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
 The workflow uses GitHub-hosted runners, npm 12.2.0, job-scoped id-token: write
 and provenance. It does not require NPM_TOKEN or any Gitea credential. Configure
-the trusted publisher before expecting a tag run to publish successfully. If npm
+the trusted publisher before expecting a main run to publish successfully. If npm
 requires an initial package publication before its settings are available, an
 authorized maintainer must bootstrap it once with native npm authentication;
 do not add a permanent token fallback or claim OIDC setup has been completed.
 
 For a release, update package.json's version and CHANGELOG.md, run checks, commit
-and push main to both remotes. Then tag that reviewed commit and push the tag to
-GitHub (and Gitea for history):
+and push main to both remotes. The push to GitHub's main publishes the new version;
+no tag is needed:
 
 ```sh
 git remote add github https://github.com/fwdslsh/unify-lab-reports-template.git
 git push github HEAD:main
-git tag v0.1.2
-git push github v0.1.2
-git push origin v0.1.2
 ```
 
-Use the actual version and skip remote creation if already configured. Watch
-GitHub Actions; a successful verification is not proof of registry publication.
-Check npm's version/dist-tag and exercise native init from the published package
-after release. Never republish an immutable version or silently overwrite a tag.
+Skip remote creation if already configured. Watch GitHub Actions; a successful
+verification is not proof of registry publication. Check npm's version/dist-tag
+and exercise native init from the published package after release. Never
+republish an immutable version: a version npm already has is skipped, so a new
+release always needs a new version.

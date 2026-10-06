@@ -127,6 +127,7 @@ never delete or automatically commit authored content.
 ## Maintainers
 
 [Maintainer checks](docs/maintaining.md) cover tests, packaging and release gates.
-The package is `@fwdslsh/unify-lab-reports-template`. Reviewed version tags publish
-through GitHub Actions using npm trusted publishing; ordinary pushes only verify.
+The package is `@fwdslsh/unify-lab-reports-template`. A push to main with a new
+package.json version publishes through GitHub Actions using npm trusted publishing;
+pull requests and manual runs only verify.
 MIT licensed, including the theme; dependencies keep their licenses.

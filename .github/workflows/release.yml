@@ -1,9 +1,16 @@
 name: Verify and publish
 
+# Every push, pull request and manual run is verified: tests, the strict
+# build, the audit, shell and Compose syntax, and the exact npm tarball.
+# A push to main whose package.json version is not on npm yet publishes
+# that tested tarball, the way fwdslsh/unify publishes its built-in
+# templates: bump the version in package.json, merge, and it ships. A
+# version npm already has is skipped, so a run is safe to repeat, and a
+# manual run only verifies.
+
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -21,6 +28,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       npm_tag: ${{ steps.version.outputs.npm_tag }}
+      skip: ${{ steps.version.outputs.skip }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -32,20 +40,29 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: '1.4.1'
-      - name: Check package identity and release tag
+      - name: Check package identity, and skip a version npm already has
         id: version
         run: |
-          node --input-type=module <<'JS'
-          import { readFileSync, appendFileSync } from 'node:fs';
-          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-          if (pkg.name !== '@fwdslsh/unify-lab-reports-template' || pkg.private) {
-            throw new Error('Unexpected package identity or private package');
-          }
-          if (process.env.GITHUB_REF_TYPE === 'tag' && process.env.GITHUB_REF_NAME !== `v${pkg.version}`) {
-            throw new Error('Release tag must match package.json version');
-          }
-          appendFileSync(process.env.GITHUB_OUTPUT, `npm_tag=${pkg.version.includes('-') ? 'next' : 'latest'}\n`);
-          JS
+          set -euo pipefail
+          name="$(node -p "require('./package.json').name")"
+          version="$(node -p "require('./package.json').version")"
+          private="$(node -p "require('./package.json').private === true")"
+          if [ "$name" != '@fwdslsh/unify-lab-reports-template' ] || [ "$private" != 'false' ]; then
+            echo '::error::Unexpected package identity or private package'; exit 1
+          fi
+          # `npm view` exits 0 with empty output for a missing version of an
+          # existing package, so the answer is in the output, not the exit code.
+          if [ -n "$(npm view "$name@$version" version 2>/dev/null)" ]; then
+            echo "$name@$version is already on npm - nothing to publish"
+            echo 'skip=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "$name@$version is not on npm yet"
+            echo 'skip=false' >> "$GITHUB_OUTPUT"
+          fi
+          case "$version" in
+            *-*) echo 'npm_tag=next' >> "$GITHUB_OUTPUT" ;;
+            *) echo 'npm_tag=latest' >> "$GITHUB_OUTPUT" ;;
+          esac
       - run: bun install --frozen-lockfile --ignore-scripts
       - run: bun run test
       - run: bun run check
@@ -69,7 +86,7 @@ jobs:
           retention-days: 7
 
   publish:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'fwdslsh/unify-lab-reports-template'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.verify.outputs.skip == 'false' && github.repository == 'fwdslsh/unify-lab-reports-template'
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 5
