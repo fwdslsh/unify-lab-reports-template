@@ -1,6 +1,6 @@
 {
   "name": "@fwdslsh/unify-lab-reports-template",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.1",
   "description": "A configurable Unify lab reports site with a static health dashboard and optional bounded collection.",
   "type": "module",
   "license": "MIT",
