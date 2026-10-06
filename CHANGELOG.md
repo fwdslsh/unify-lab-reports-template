@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Add the `unify-template` keyword, which is how npm searches and the template list on fwdslsh.dev find a unify template.
+
 ## 0.1.2
 
 - Use an explicit local tarball path in the npm release workflow; test the real publish command with a dry run.
