@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.1
+
+- Native npm installation as the primary setup path, with Git and directory sources still supported.
+- Remove the redundant Lab badge beside the /home link.
 
 - Authored chrome and native slotted section templates in site/_includes/; previews no longer need generated includes.
 - Presentation lives in HTML, separate from collection/monitoring config.json. Existing authored dashboards remain supported.

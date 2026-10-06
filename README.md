@@ -12,16 +12,15 @@ Install Bun 1.4+ and Unify 0.11.6+, then initialize an empty project:
 bun add --global @fwdslsh/unify@^0.11.6
 mkdir my-lab-reports
 cd my-lab-reports
-unify init https://github.com/fwdslsh/unify-lab-reports-template.git --audit
+unify init @fwdslsh/unify-lab-reports-template --audit
 unify dev
 ```
 
-The URL identifies the public template source, not a repository you must create
-or keep connected. You can instead use `unify init /path/to/clean/template`
-with downloaded files.
+The npm package supplies the template files; no template Git checkout is needed.
+You can instead use `unify init https://github.com/fwdslsh/unify-lab-reports-template.git`
+or `unify init /path/to/clean/template` with downloaded files.
 Directory sources must be clean: Unify copies regular files, including ignored
-runtime data if present. The npm package will provide another source once
-published; it is not published yet.
+runtime data if present.
 
 Edit the branding in `site/_includes/header.html` and the palette/fonts in
 `site/assets/theme.css`, then write Markdown/HTML under `site/`.
@@ -128,5 +127,6 @@ never delete or automatically commit authored content.
 ## Maintainers
 
 [Maintainer checks](docs/maintaining.md) cover tests, packaging and release gates.
-The package is `@fwdslsh/unify-lab-reports-template`; nothing is published to npm
-automatically. MIT licensed, including the theme; dependencies keep their licenses.
+The package is `@fwdslsh/unify-lab-reports-template`. Reviewed version tags publish
+through GitHub Actions using npm trusted publishing; ordinary pushes only verify.
+MIT licensed, including the theme; dependencies keep their licenses.
